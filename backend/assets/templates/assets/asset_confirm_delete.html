@@ -1,0 +1,8 @@
+<h1>Confirmar Exclusão</h1>
+
+<p>Tem certeza que deseja excluir {{ asset.ticker }}?</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Confirmar</button>
+</form>
