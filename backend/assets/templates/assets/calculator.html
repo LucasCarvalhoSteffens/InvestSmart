@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>InvestSmart</title>
+</head>
+
+<body>
+
+<h2>Calculadora Barsi</h2>
+
+<input id="ticker" placeholder="Ticker">
+
+<input id="price" placeholder="Preço Atual">
+
+<input id="dividend" placeholder="Dividendo anual">
+
+<button onclick="calculate()">Calcular</button>
+
+<pre id="result"></pre>
+
+<script>
+
+async function calculate(){
+
+    const ticker = document.getElementById("ticker").value
+    const price = parseFloat(document.getElementById("price").value)
+    const dividend = parseFloat(document.getElementById("dividend").value)
+
+    const response = await fetch("/assets/barsi/", {
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+            ticker:ticker,
+            price:price,
+            dividends:[dividend]
+        })
+    })
+
+    const data = await response.json()
+
+    document.getElementById("result").innerText = JSON.stringify(data,null,2)
+
+}
+
+</script>
+
+</body>
+</html>

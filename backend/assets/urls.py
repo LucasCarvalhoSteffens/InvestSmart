@@ -7,4 +7,7 @@ urlpatterns = [
     path('create/', views.asset_create, name='asset_create'),
     path('<int:pk>/update/', views.asset_update, name='asset_update'),
     path('<int:pk>/delete/', views.asset_delete, name='asset_delete'),
+
+    # calculadora barsi
+    path("barsi/", views.barsi_calculator, name="barsi_calculator"),
 ]
