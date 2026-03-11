@@ -1,49 +1,81 @@
 # 📊 InvestSmart
 
-Aplicação web desenvolvida com Django para gerenciamento e análise fundamentalista de ativos financeiros.
+Aplicação web desenvolvida com **Django** para **análise fundamentalista de ativos financeiros**, com foco em estratégias de **investimento em dividendos** e arquitetura backend escalável.
+
+O projeto implementa uma **calculadora multi-método de valuation**, iniciando pela estratégia de dividendos utilizada por **Luiz Barsi**.
 
 ---
 
-## Code Quality
+# Code Quality
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=LucasCarvalhoSteffens_InvestSmart)
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=bugs)](https://sonarcloud.io/summary/new_code?id=LucasCarvalhoSteffens_InvestSmart)
-[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=LucasCarvalhoSteffens_InvestSmart)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=LucasCarvalhoSteffens_InvestSmart)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=coverage)](https://sonarcloud.io/summary/new_code?id=LucasCarvalhoSteffens_InvestSmart)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=LucasCarvalhoSteffens_InvestSmart)  
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=bugs)](https://sonarcloud.io/summary/new_code?id=LucasCarvalhoSteffens_InvestSmart)  
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=LucasCarvalhoSteffens_InvestSmart)  
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=LucasCarvalhoSteffens_InvestSmart)  
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=coverage)](https://sonarcloud.io/summary/new_code?id=LucasCarvalhoSteffens_InvestSmart)  
 [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=LucasCarvalhoSteffens_InvestSmart)
 
-## 🚀 Tecnologias Utilizadas
+---
 
-- Python 3
+# 🚀 Tecnologias Utilizadas
+
+Backend:
+
+- Python
 - Django
+
+Banco de dados:
+
 - PostgreSQL
+
+Infraestrutura:
+
 - Docker
+- Docker Compose
+
+Frontend (atual):
+
 - HTML
+- JavaScript
+
+Qualidade de código:
+
+- SonarCloud
 
 ---
 
-## 🏗️ Arquitetura do Projeto
+# 🏗️ Arquitetura do Projeto
 
 ```
-InvestSmart/
+InvestSmart
 │
-├── backend/
-│   ├── assets/          # App responsável pelos ativos financeiros
-│   ├── config/          # Configurações principais do projeto Django
+├── backend
+│   │
+│   ├── assets
+│   │   ├── calculators
+│   │   │   └── barsi_method.py
+│   │   │
+│   │   ├── models.py
+│   │   ├── views.py
+│   │   ├── urls.py
+│   │   └── templates
+│   │        └── assets
+│   │             └── calculator.html
+│   │
+│   ├── config
 │   └── manage.py
 │
-├── docker-compose.yml   # Container PostgreSQL
-├── requirements.txt     # Dependências Python
-├── .env                 # Variáveis de ambiente (não versionado)
+├── docker-compose.yml
+├── requirements.txt
+├── .env
 └── README.md
 ```
 
 ---
 
-## ⚙️ Como Executar o Projeto
+# ⚙️ Como Executar o Projeto
 
-### 1️⃣ Clonar o repositório
+## 1️⃣ Clonar o repositório
 
 ```bash
 git clone https://github.com/LucasCarvalhoSteffens/InvestSmart
@@ -52,25 +84,27 @@ cd InvestSmart
 
 ---
 
-### 2️⃣ Criar e ativar ambiente virtual
+# 2️⃣ Criar ambiente virtual
 
 ```bash
 python -m venv venv
 ```
 
-#### Windows:
+### Windows
+
 ```bash
 venv\Scripts\activate
 ```
 
-#### Linux/Mac:
+### Linux / Mac
+
 ```bash
 source venv/bin/activate
 ```
 
 ---
 
-### 3️⃣ Instalar dependências
+# 3️⃣ Instalar dependências
 
 ```bash
 pip install -r requirements.txt
@@ -78,31 +112,31 @@ pip install -r requirements.txt
 
 ---
 
-### 4️⃣ Criar arquivo `.env`
+# 4️⃣ Configurar variáveis de ambiente
 
-Crie um arquivo chamado `.env` na raiz do projeto com o seguinte conteúdo:
+Crie o arquivo `.env` na raiz do projeto:
 
 ```
-POSTGRES_DB=your_database
-POSTGRES_USER=your_user
-POSTGRES_PASSWORD=your_password
+POSTGRES_DB=investsmart
+POSTGRES_USER=investsmart_user
+POSTGRES_PASSWORD=investsmart_pass
 POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
+
+SECRET_KEY_DJANGO=your_secret_key
 ```
 
-⚠️ Esse arquivo NÃO deve ser versionado.
+Esse arquivo **não deve ser versionado**.
 
 ---
 
-### 5️⃣ Subir banco de dados com Docker
-
-Certifique-se de que o Docker está instalado e em execução.
+# 5️⃣ Subir banco de dados com Docker
 
 ```bash
 docker compose up -d
 ```
 
-Verifique se o container está ativo:
+Verificar container:
 
 ```bash
 docker ps
@@ -110,7 +144,7 @@ docker ps
 
 ---
 
-### 6️⃣ Rodar migrations
+# 6️⃣ Rodar migrations
 
 ```bash
 cd backend
@@ -119,88 +153,160 @@ python manage.py migrate
 
 ---
 
-### 7️⃣ Criar superusuário (opcional)
+# 7️⃣ Criar superusuário
 
 ```bash
 python manage.py createsuperuser
 ```
 
+Acesse o painel administrativo:
+
+```
+http://127.0.0.1:8000/admin
+```
+
 ---
 
-### 8️⃣ Iniciar servidor
+# 8️⃣ Executar servidor
 
 ```bash
 python manage.py runserver
 ```
 
-Acesse:
+Aplicação disponível em:
 
-- Admin: http://127.0.0.1:8000/admin/
-- Aplicação: http://127.0.0.1:8000/assets/
-
----
-
-## 📦 Funcionalidades Atuais
-
-- CRUD completo de ativos financeiros
-- Persistência em PostgreSQL
-- Interface administrativa via Django Admin
-- Estrutura preparada para evolução com APIs externas
-
----
-
-## 🛠️ Roadmap do Projeto
-
-- Integração com API financeira
-- Atualização automática de preços
-- Dashboard com indicadores
-- Testes automatizados
-- Dockerização completa do backend
-- Deploy em ambiente cloud
-
----
-
-## 🐳 Banco de Dados
-
-O projeto utiliza PostgreSQL rodando em container Docker.
-
-A configuração é feita via variáveis de ambiente definidas no arquivo `.env`.
-
----
-
-## 🔐 Segurança
-
-- Credenciais não são versionadas
-- Uso de variáveis de ambiente
-- `.env` incluído no `.gitignore`
-- `venv/` não versionado
-
----
-
-## 📌 Objetivo do Projeto
-
-Demonstrar:
-
-- Organização de arquitetura backend
-- Separação entre aplicação e infraestrutura
-- Uso de containers
-- Evolução incremental com boas práticas
-
----
-
-## 🧠 Observações
-
-Antes de rodar o projeto, certifique-se de:
-
-- Docker estar ativo
-- Ambiente virtual ativado
-- Arquivo `.env` configurado corretamente
-
-Caso altere modelos:
-
-```bash
-python manage.py makemigrations
-python manage.py migrate
+```
+http://127.0.0.1:8000/assets
 ```
 
 ---
+
+# 📦 Modelagem de Dados
+
+### Asset
+
+Representa um ativo financeiro.
+
+Campos principais:
+
+- ticker
+- name
+- sector
+- current_price
+
+---
+
+### Dividend
+
+Armazena histórico de dividendos pagos pelo ativo.
+
+Relacionamento:
+
+```
+Asset 1 ---- N Dividend
+```
+
+---
+
+### BarsiAnalysis
+
+Armazena o resultado das análises feitas pela calculadora.
+
+Relacionamento:
+
+```
+Asset 1 ---- N BarsiAnalysis
+```
+
+---
+
+# 📈 Calculadora Barsi
+
+A aplicação implementa o método de valuation baseado em dividendos utilizado por **Luiz Barsi**.
+
+A lógica calcula:
+
+- Dividendos anuais
+- Dividend Yield alvo
+- Preço teto
+- Margem de segurança
+- Oportunidade de compra
+
+Fluxo:
+
+```
+Frontend
+   ↓
+POST /assets/barsi
+   ↓
+BarsiCalculator
+   ↓
+Resultado salvo em BarsiAnalysis
+```
+
+---
+
+# 📊 Funcionalidades Atuais
+
+✔ CRUD completo de ativos  
+✔ Persistência em PostgreSQL  
+✔ Integração com Docker  
+✔ Interface administrativa via Django Admin  
+✔ Calculadora de valuation (método Barsi)  
+✔ Histórico de análises salvo no banco
+
+---
+
+# 🐳 Banco de Dados
+
+Banco executado em container Docker.
+
+Para acessar manualmente:
+
+```bash
+docker exec -it investsmart_db psql -U investsmart_user -d investsmart
+```
+
+Consultar usuários:
+
+```sql
+SELECT username, email, is_superuser
+FROM auth_user;
+```
+
+---
+
+# 🔐 Segurança
+
+Boas práticas adotadas:
+
+- Variáveis sensíveis em `.env`
+- `.env` no `.gitignore`
+- `venv/` não versionado
+- Credenciais separadas da aplicação
+
+---
+
+# 🛠️ Roadmap
+
+Próximos recursos planejados:
+
+- Integração com APIs financeiras
+- Atualização automática de dividendos
+- Dashboard com indicadores
+- Suporte a múltiplos métodos de valuation
+- Testes automatizados
+- API REST
+- Deploy em cloud
+
+---
+
+# 🎯 Objetivo do Projeto
+
+Este projeto foi desenvolvido com foco em **portfólio de engenharia de software**, demonstrando:
+
+- arquitetura backend organizada
+- modelagem de dados
+- integração com banco relacional
+- uso de containers
+- evolução incremental de features
