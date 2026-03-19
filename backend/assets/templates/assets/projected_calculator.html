@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Projetiva - InvestSmart</title>
+</head>
+<body>
+    <h1>Calculadora - Preço Teto Projetivo</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div>{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Calcular</button>
+    </form>
+
+    {% if result %}
+        <hr>
+        <h2>Resultado</h2>
+        <p><strong>Ativo:</strong> {{ result.asset }}</p>
+        <p><strong>DPA:</strong> {{ result.dpa }}</p>
+        <p><strong>Dividend Yield Médio:</strong> {{ result.average_dividend_yield }}</p>
+        <p><strong>Preço Bruto:</strong> R$ {{ result.raw_price }}</p>
+        <p><strong>Preço Teto:</strong> R$ {{ result.price_ceiling }}</p>
+    {% endif %}
+
+    <hr>
+    <h2>Histórico</h2>
+
+    {% for analysis in analyses %}
+        <div>
+            <p>
+                <strong>{{ analysis.asset }}</strong> |
+                DPA: {{ analysis.dpa }} |
+                DY Médio: {{ analysis.average_dividend_yield }} |
+                Preço Bruto: R$ {{ analysis.raw_price }} |
+                Preço Teto: R$ {{ analysis.price_ceiling }} |
+                Data: {{ analysis.created_at }}
+            </p>
+        </div>
+    {% empty %}
+        <p>Nenhuma análise projetiva registrada ainda.</p>
+    {% endfor %}
+
+    <hr>
+    <p><a href="{% url 'asset_list' %}">Voltar para lista de ativos</a></p>
+</body>
+</html>
