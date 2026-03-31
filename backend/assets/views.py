@@ -1,14 +1,18 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-
-import json
-
-from .models import Asset, BarsiAnalysis
-from .forms import AssetForm
+from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect, render
 from .calculators.barsi_method import BarsiCalculator
+from .calculators.graham_method import calculate_graham_price
+from .calculators.projected_method import calculate_projected_price
+
+from .forms import AssetForm, BarsiAnalysisForm, GrahamAnalysisForm, ProjectedAnalysisForm
+from .models import Asset, BarsiAnalysis, GrahamAnalysis, ProjectedAnalysis
+
+from .models import Asset, BarsiAnalysis, GrahamAnalysis
 
 
+
+def calculator_page(request):
+    return render(request, "assets/calculator.html")
 # -----------------------------
 # CRUD DE ATIVOS
 # -----------------------------
@@ -30,7 +34,6 @@ def asset_create(request):
 
 def asset_update(request, pk):
     asset = get_object_or_404(Asset, pk=pk)
-
     form = AssetForm(request.POST or None, instance=asset)
 
     if form.is_valid():
@@ -54,45 +57,138 @@ def asset_delete(request, pk):
 # CALCULADORA BARSI
 # -----------------------------
 
-@csrf_exempt
-def barsi_calculator(request):
+def barsi_calculator_view(request):
+    form = BarsiAnalysisForm(request.POST or None)
+    result = None
 
-    if request.method == "GET":
-        return render(request, "assets/calculator.html")
+    if request.method == "POST" and form.is_valid():
+        asset = form.cleaned_data["asset"]
+        current_price = form.cleaned_data["current_price"]
+        target_yield = form.cleaned_data["target_yield"]
 
-    if request.method == "POST":
+        dividends = [
+            form.cleaned_data["dividend_1"],
+            form.cleaned_data["dividend_2"],
+            form.cleaned_data["dividend_3"],
+            form.cleaned_data["dividend_4"],
+        ]
 
-        data = json.loads(request.body)
+        try:
+            calculator = BarsiCalculator(
+                dividends_last_12_months=dividends,
+                current_price=current_price,
+                target_yield=target_yield,
+            )
 
-        ticker = data["ticker"]
-        price = data["price"]
-        dividends = data["dividends"]
+            calculated_data = calculator.calculate()
 
-        calculator = BarsiCalculator(dividends, price)
-        result = calculator.calculate()
+            result = BarsiAnalysis.objects.create(
+                asset=asset,
+                annual_dividend=calculated_data["annual_dividend"],
+                current_price=calculated_data["current_price"],
+                target_yield=calculated_data["target_dividend_yield"],
+                price_ceiling=calculated_data["price_ceiling"],
+                margin=calculated_data["margin"],
+                opportunity=calculated_data["opportunity"],
+            )
 
-        # busca ou cria o asset
-        asset, created = Asset.objects.get_or_create(
-            ticker=ticker,
-            defaults={
-                "name": ticker,
-                "sector": "Unknown",
-                "current_price": price
-            }
-        )
+            messages.success(request, "Cálculo do método Barsi realizado com sucesso.")
 
-        # salva análise
-        analysis = BarsiAnalysis.objects.create(
-            asset=asset,
-            current_price=price,
-            annual_dividend=result["annual_dividend"],
-            price_ceiling=result["price_ceiling"],
-            margin=result["margin"],
-            opportunity=result["opportunity"],
-        )
+        except ValueError as exc:
+            messages.error(request, str(exc))
 
-        result["analysis_id"] = analysis.id
+    analyses = BarsiAnalysis.objects.select_related("asset").all()[:10]
 
-        return JsonResponse(result)
+    return render(
+        request,
+        "assets/barsi_calculator.html",
+        {
+            "form": form,
+            "result": result,
+            "analyses": analyses,
+        },
+    )
 
-    return JsonResponse({"error": "Método não permitido"}, status=400)
+
+# -----------------------------
+# CALCULADORA GRAHAM
+# -----------------------------
+
+def graham_calculator_view(request):
+    form = GrahamAnalysisForm(request.POST or None)
+    result = None
+
+    if request.method == "POST" and form.is_valid():
+        asset = form.cleaned_data["asset"]
+        lpa = form.cleaned_data["lpa"]
+        vpa = form.cleaned_data["vpa"]
+
+        try:
+            fair_price = calculate_graham_price(
+                lpa=lpa,
+                vpa=vpa
+            )
+
+            result = GrahamAnalysis.objects.create(
+                asset=asset,
+                lpa=lpa,
+                vpa=vpa,
+                fair_price=fair_price
+            )
+
+            messages.success(request, "Cálculo de Graham realizado com sucesso.")
+
+        except ValueError as exc:
+            messages.error(request, str(exc))
+
+    analyses = GrahamAnalysis.objects.select_related("asset").all()[:10]
+
+    return render(
+        request,
+        "assets/graham_calculator.html",
+        {
+            "form": form,
+            "result": result,
+            "analyses": analyses,
+        },
+    )
+
+def projected_calculator_view(request):
+    form = ProjectedAnalysisForm(request.POST or None)
+    result = None
+
+    if request.method == "POST" and form.is_valid():
+        asset = form.cleaned_data["asset"]
+        dpa = form.cleaned_data["dpa"]
+        average_dividend_yield = form.cleaned_data["average_dividend_yield"]
+
+        try:
+            calculated_data = calculate_projected_price(
+                dpa=dpa,
+                average_dividend_yield=average_dividend_yield
+            )
+
+            result = ProjectedAnalysis.objects.create(
+                asset=asset,
+                dpa=dpa,
+                average_dividend_yield=average_dividend_yield,
+                raw_price=calculated_data["raw_price"],
+                price_ceiling=calculated_data["price_ceiling"],
+            )
+
+            messages.success(request, "Cálculo do preço teto projetivo realizado com sucesso.")
+
+        except ValueError as exc:
+            messages.error(request, str(exc))
+
+    analyses = ProjectedAnalysis.objects.select_related("asset").all()[:10]
+
+    return render(
+        request,
+        "assets/projected_calculator.html",
+        {
+            "form": form,
+            "result": result,
+            "analyses": analyses,
+        },
+    )

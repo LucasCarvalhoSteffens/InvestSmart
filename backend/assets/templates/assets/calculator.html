@@ -1,50 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-<title>InvestSmart</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadoras - InvestSmart</title>
 </head>
-
 <body>
+    <h1>Calculadoras InvestSmart</h1>
+    <p>Escolha o método de valuation que deseja utilizar.</p>
 
-<h2>Calculadora Barsi</h2>
+    <hr>
 
-<input id="ticker" placeholder="Ticker">
+    <h2>Métodos disponíveis</h2>
 
-<input id="price" placeholder="Preço Atual">
+    <ul>
+        <li>
+            <h3>Método Barsi</h3>
+            <p>Calcula o preço teto com base em dividendos e dividend yield alvo.</p>
+            <a href="{% url 'barsi_calculator' %}">Acessar Calculadora Barsi</a>
+        </li>
 
-<input id="dividend" placeholder="Dividendo anual">
+        <li>
+            <h3>Método Graham</h3>
+            <p>Calcula o preço justo com base no LPA e no VPA.</p>
+            <a href="{% url 'graham_calculator' %}">Acessar Calculadora Graham</a>
+        </li>
 
-<button onclick="calculate()">Calcular</button>
+        <li>
+            <h3>Preço Teto Projetivo</h3>
+            <p>Calcula o preço teto com base no DPA e no dividend yield médio.</p>
+            <a href="{% url 'projected_calculator' %}">Acessar Calculadora Projetiva</a>
+        </li>
+    </ul>
 
-<pre id="result"></pre>
+    <hr>
 
-<script>
-
-async function calculate(){
-
-    const ticker = document.getElementById("ticker").value
-    const price = parseFloat(document.getElementById("price").value)
-    const dividend = parseFloat(document.getElementById("dividend").value)
-
-    const response = await fetch("/assets/barsi/", {
-        method:"POST",
-        headers:{
-            "Content-Type":"application/json"
-        },
-        body:JSON.stringify({
-            ticker:ticker,
-            price:price,
-            dividends:[dividend]
-        })
-    })
-
-    const data = await response.json()
-
-    document.getElementById("result").innerText = JSON.stringify(data,null,2)
-
-}
-
-</script>
-
+    <p><a href="{% url 'asset_list' %}">Voltar para lista de ativos</a></p>
 </body>
 </html>
