@@ -2,6 +2,10 @@ from django import forms
 from .models import Asset
 
 
+class LoginForm(forms.Form):
+    username = forms.CharField(label="Usuário", max_length=150)
+    password = forms.CharField(label="Senha", widget=forms.PasswordInput)
+
 class BarsiAnalysisForm(forms.Form):
     asset = forms.ModelChoiceField(
         queryset=Asset.objects.all(),
