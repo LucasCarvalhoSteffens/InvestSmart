@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from .calculators.barsi_method import BarsiCalculator
 from .calculators.graham_method import calculate_graham_price
 from .calculators.projected_method import calculate_projected_price
+from django.contrib.auth.decorators import login_required
 
 from .forms import AssetForm, BarsiAnalysisForm, GrahamAnalysisForm, ProjectedAnalysisForm
 from .models import Asset, BarsiAnalysis, GrahamAnalysis, ProjectedAnalysis
@@ -10,18 +11,19 @@ from .models import Asset, BarsiAnalysis, GrahamAnalysis, ProjectedAnalysis
 from .models import Asset, BarsiAnalysis, GrahamAnalysis
 
 
-
+@login_required
 def calculator_page(request):
     return render(request, "assets/calculator.html")
 # -----------------------------
 # CRUD DE ATIVOS
 # -----------------------------
 
+@login_required
 def asset_list(request):
     assets = Asset.objects.all()
     return render(request, "assets/asset_list.html", {"assets": assets})
 
-
+@login_required
 def asset_create(request):
     form = AssetForm(request.POST or None)
 
@@ -31,7 +33,7 @@ def asset_create(request):
 
     return render(request, "assets/asset_form.html", {"form": form})
 
-
+@login_required
 def asset_update(request, pk):
     asset = get_object_or_404(Asset, pk=pk)
     form = AssetForm(request.POST or None, instance=asset)
@@ -42,7 +44,7 @@ def asset_update(request, pk):
 
     return render(request, "assets/asset_form.html", {"form": form})
 
-
+@login_required
 def asset_delete(request, pk):
     asset = get_object_or_404(Asset, pk=pk)
 
@@ -57,6 +59,7 @@ def asset_delete(request, pk):
 # CALCULADORA BARSI
 # -----------------------------
 
+@login_required
 def barsi_calculator_view(request):
     form = BarsiAnalysisForm(request.POST or None)
     result = None
@@ -114,6 +117,7 @@ def barsi_calculator_view(request):
 # CALCULADORA GRAHAM
 # -----------------------------
 
+@login_required
 def graham_calculator_view(request):
     form = GrahamAnalysisForm(request.POST or None)
     result = None
@@ -153,6 +157,7 @@ def graham_calculator_view(request):
         },
     )
 
+@login_required
 def projected_calculator_view(request):
     form = ProjectedAnalysisForm(request.POST or None)
     result = None
