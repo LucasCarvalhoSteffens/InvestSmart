@@ -1,15 +1,5 @@
 # 📊 InvestSmart
 
-Aplicação web para **análise fundamentalista de ativos financeiros**, com foco em **valuation**, **investimento em dividendos** e evolução incremental de uma arquitetura organizada para o projeto de **Portfólio em Engenharia de Software**.
-
-O projeto já possui uma base funcional em **Django + PostgreSQL**, com **CRUD de ativos**, **persistência das análises** e uma **calculadora multimétodo de preço justo**, contemplando os métodos **Barsi**, **Graham** e **Preço Teto Projetivo**.
-
-Além disso, o projeto já iniciou a implementação da **parte de autenticação**, com **fluxo de login em andamento**. Essa funcionalidade **ainda não está concluída**, mas já faz parte da evolução atual do sistema e da documentação do projeto.
-
----
-
-## Code Quality
-
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=LucasCarvalhoSteffens_InvestSmart)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=bugs)](https://sonarcloud.io/summary/new_code?id=LucasCarvalhoSteffens_InvestSmart)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=LucasCarvalhoSteffens_InvestSmart)
@@ -17,585 +7,592 @@ Além disso, o projeto já iniciou a implementação da **parte de autenticaçã
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=coverage)](https://sonarcloud.io/summary/new_code?id=LucasCarvalhoSteffens_InvestSmart)
 [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=LucasCarvalhoSteffens_InvestSmart)
 
----
+Plataforma web para **análise fundamentalista de ações** e evolução para **simulação de carteiras de investimento**, desenvolvida com **Django REST Framework**, **React** e **PostgreSQL**.
 
-## ✨ Visão Geral
+O projeto foi idealizado para reunir, em um único ambiente, funcionalidades que normalmente estão espalhadas em diferentes plataformas de mercado, com foco em **valuation**, **investimento em dividendos**, **comparação entre métodos de precificação** e futura **simulação de carteiras**.
 
-O **InvestSmart** foi criado para centralizar, em um único ambiente, funcionalidades que normalmente ficam dispersas em várias plataformas de análise financeira.
-
-Atualmente, o sistema já contempla:
-
-- cadastro, edição, listagem e remoção de ativos;
-- cálculo de preço teto pelo **método Barsi**;
-- cálculo de preço justo pelo **método Graham**;
-- cálculo de **Preço Teto Projetivo**;
-- armazenamento do histórico das análises no banco de dados;
-- uso do **Django Admin** para administração;
-- banco de dados **PostgreSQL** executado com **Docker Compose**;
-- integração de qualidade com **SonarCloud**;
-- estrutura preparada para evolução contínua do sistema.
+> **Status do projeto:** em desenvolvimento  
+> **Natureza do projeto:** acadêmico/profissional, desenvolvido para a disciplina de **Portfólio** em **Engenharia de Software**  
+> **Observação:** esta aplicação tem caráter educacional e de apoio à análise, não constituindo recomendação de investimento.
 
 ---
 
-## ✅ Funcionalidades Implementadas
+## 🚀 Objetivo do Projeto
 
-### Gestão de ativos
-- CRUD completo de ativos;
-- listagem de ativos cadastrados;
-- criação, edição e exclusão de registros;
-- persistência em PostgreSQL.
+O **InvestSmart** busca oferecer uma experiência unificada para investidores pessoa física, principalmente iniciantes e intermediários, permitindo:
 
-### Calculadora multimétodo
-- **Método Barsi**;
-- **Método Graham**;
-- **Preço Teto Projetivo**;
-- página principal para centralizar as calculadoras;
-- formulários específicos para cada método.
-
-### Persistência de análises
-- armazenamento do histórico das execuções;
-- associação entre ativo e análise realizada;
-- base preparada para futuras comparações e dashboards.
-
-### Infraestrutura e qualidade
-- banco relacional em **PostgreSQL**;
-- subida do banco com **Docker Compose**;
-- configuração de análise com **SonarCloud**;
-- base preparada para evolução de testes automatizados.
-
-### Segurança básica já aplicada
-- uso de variáveis sensíveis via `.env`;
-- separação entre credenciais e código-fonte;
-- proteção CSRF nativa do Django nos formulários;
-- uso de `django.contrib.auth` no projeto;
-- `.env` e `venv/` fora do versionamento.
+- cálculo de preço justo por múltiplos métodos;
+- comparação entre abordagens de valuation;
+- centralização de análises em uma única plataforma;
+- evolução para simulador de carteiras;
+- visualização futura de dashboards de dividendos, valuation e projeções;
+- apoio educacional no estudo de análise fundamentalista.
 
 ---
 
-## 🔐 Login e Autenticação
+## ❗ Problema que o Projeto Resolve
 
-A parte de autenticação **já entrou no escopo implementado do projeto**, porém **ainda não está finalizada**.
+Hoje, boa parte das ferramentas de análise de ações apresenta pelo menos um destes problemas:
 
-### Status atual
-- estrutura de autenticação já considerada na evolução do sistema;
-- implementação de **login** em andamento;
-- definição e estudo do fluxo com **JWT + Refresh Token**;
-- autenticação ainda **não totalmente integrada** às rotas públicas atuais da aplicação;
-- proteção completa de páginas/fluxos por usuário ainda está em evolução.
+- funcionalidades fragmentadas em várias plataformas;
+- limitação de recursos em planos gratuitos;
+- ausência de comparação entre diferentes métodos de valuation;
+- pouca flexibilidade para projeções e simulações personalizadas;
+- dificuldade de uso para investidores iniciantes.
 
-### Objetivo dessa funcionalidade
-A autenticação será usada para:
-
-- permitir acesso individual de usuários;
-- associar análises e futuras carteiras ao usuário autenticado;
-- proteger funcionalidades restritas;
-- evoluir para um fluxo mais seguro de sessão com **access token** e **refresh token**.
-
-### Observação
-Mesmo já fazendo parte da implementação discutida e iniciada, o **login ainda está em desenvolvimento** e por isso não é tratado neste momento como funcionalidade concluída do MVP público atual.
+O **InvestSmart** foi proposto para reduzir essa fragmentação e concentrar os principais recursos em uma solução própria, organizada e evolutiva.
 
 ---
 
-## 🧮 Métodos de Valuation Disponíveis
+## ✨ Principais Diferenciais
 
-## 1. Método Barsi
+- **Calculadora multimétodo integrada** em uma única plataforma;
+- **Arquitetura modular** para facilitar manutenção e evolução;
+- **Backend desacoplado do frontend** via API REST;
+- **Autenticação com JWT e refresh token** em evolução;
+- **Base preparada para histórico de análises** e associação por usuário;
+- **Estrutura pronta para simulador de carteiras**, alertas e dashboards;
+- **Integração com ferramentas de qualidade**, como SonarCloud;
+- **Foco em boas práticas de Engenharia de Software**, com separação por responsabilidade, organização em camadas e crescimento incremental.
 
-Método baseado em dividendos e dividend yield alvo.
+---
 
-### Lógica principal
+## 🏗️ Arquitetura
 
+O projeto segue uma arquitetura **client-server em camadas**, conforme definido no RFC.
+
+### Stack principal
+
+- **Frontend:** React
+- **Backend:** Django REST Framework
+- **Banco de Dados:** PostgreSQL
+- **Autenticação:** JWT com access token e refresh token
+- **Comunicação:** API REST
+- **Infraestrutura local:** Docker / Docker Compose
+- **Qualidade:** SonarCloud
+- **Versionamento:** GitHub
+
+### Camadas
+
+- **Camada de Apresentação:** React
+- **Camada de Lógica de Negócio:** Django REST Framework
+- **Camada de Persistência:** PostgreSQL
+
+---
+
+## 🧠 Métodos de Valuation Implementados
+
+### 1. Método Graham
+
+Utilizado para cálculo de preço justo com base em indicadores fundamentalistas clássicos.
+
+**Entradas principais:**
+- LPA
+- VPA
+
+**Fórmula base:**
+```text
+Preço Justo = √(22.5 × LPA × VPA)
+```
+
+**Saída principal:**
+- preço justo estimado
+
+---
+
+### 2. Método Barsi
+
+Método focado em dividendos, calculando o preço teto com base no dividendo anual e no dividend yield alvo.
+
+**Entradas principais:**
+- dividendos informados
+- cotação atual
+- dividend yield alvo
+
+**Lógica base:**
 ```text
 Dividendo Anual = soma dos dividendos informados
 Preço Teto = Dividendo Anual / Dividend Yield Alvo
 Margem = Preço Teto - Cotação Atual
 ```
 
-### Saídas calculadas
-- dividendo anual;
-- dividend yield atual;
-- preço teto;
-- margem;
-- indicação de oportunidade de compra.
+**Saídas principais:**
+- dividendo anual
+- dividend yield atual
+- preço teto
+- margem
+- indicação de oportunidade de compra
 
 ---
 
-## 2. Método Graham
+### 3. Preço Teto Projetivo
 
-Método baseado na fórmula clássica de Graham.
+Método voltado para projeção do preço teto com base em dividendo por ação e dividend yield médio.
 
-### Fórmula
+**Entradas principais:**
+- DPA
+- dividend yield médio
 
+**Lógica base:**
 ```text
-Preço Justo = √(22.5 × LPA × VPA)
+Preço Teto = DPA / Dividend Yield Médio
 ```
 
-### Entradas
-- LPA;
-- VPA.
-
-### Saída
-- preço justo.
+**Saídas principais:**
+- preço bruto estimado
+- preço teto ajustado
 
 ---
 
-## 3. Preço Teto Projetivo
-
-Método baseado em dividendo por ação e dividend yield médio.
-
-### Fórmula principal
-
-```text
-Preço Teto = MROUND(DPA / Dividend Yield Médio, 0.8)
-```
-
-### Entradas
-- DPA;
-- dividend yield médio.
-
-### Saídas
-- preço bruto;
-- preço teto arredondado.
-
----
-
-## 🏗️ Stack Atual
+## ✅ Funcionalidades Implementadas
 
 ### Backend
-- Python 3.11
-- Django 5.2.1
 
-### Banco de dados
-- PostgreSQL 15
+- API REST modularizada em `apps`;
+- separação entre domínio de autenticação, ativos e valuation;
+- CRUD de ativos;
+- persistência relacional com PostgreSQL;
+- endpoints de cálculo para:
+  - **Graham**
+  - **Barsi**
+  - **Preço Teto Projetivo**
+- estrutura para persistência de análises;
+- uso de Django Admin para administração dos dados;
+- organização preparada para expansão de regras de negócio.
 
-### Interface atual
-- HTML
-- Templates Django
+### Frontend
 
-### Infraestrutura
-- Docker
-- Docker Compose
+- frontend reestruturado em **React**;
+- organização por páginas, serviços e contexto;
+- tela de login;
+- navegação principal para os métodos de cálculo;
+- páginas individuais para:
+  - **Graham**
+  - **Barsi**
+  - **Projetivo**
+- integração com o backend via API REST;
+- base para rotas protegidas;
+- fluxo inicial de autenticação em evolução.
 
-### Qualidade e análise estática
-- SonarCloud
+### Segurança e organização
 
-### Dependências atualmente utilizadas
-- `asgiref==3.11.1`
-- `Django==5.2.1`
-- `psycopg2-binary==2.9.11`
-- `python-dotenv==1.2.1`
-- `sqlparse==0.5.5`
-- `tzdata==2025.3`
+- uso de variáveis sensíveis via `.env`;
+- autenticação baseada em JWT em evolução;
+- separação entre credenciais e código-fonte;
+- base preparada para uso de refresh token;
+- estrutura desacoplada entre frontend e backend;
+- organização modular do código;
+- base preparada para testes automatizados e crescimento incremental.
 
 ---
 
-## 🧱 Arquitetura Atual do Projeto
+## 🔐 Autenticação
 
-A implementação atual segue uma organização modular baseada em Django, com separação entre:
+A autenticação do sistema está sendo estruturada com foco em:
 
-- **camada de apresentação** via templates e views;
-- **lógica de cálculo** isolada em módulos específicos;
-- **persistência** com models Django e PostgreSQL;
-- **configuração** centralizada no projeto Django;
-- **qualidade de código** com SonarCloud.
+- **JWT Access Token**
+- **Refresh Token**
+- proteção de rotas no frontend
+- envio de `Authorization: Bearer <token>` para rotas protegidas
+- identificação do usuário autenticado via rota `/api/auth/me/`
 
-### Estrutura principal
+### Status atual da autenticação
+
+- fluxo de login já entrou no escopo implementado;
+- integração com refresh token foi trabalhada no projeto;
+- contexto de autenticação no frontend já faz parte da estrutura recente;
+- parte da estabilização do fluxo completo ainda está em andamento;
+- proteção completa por usuário e refinamento de sessão ainda seguem em evolução.
+
+---
+
+## 🔄 Fluxos Principais do Sistema
+
+### 1. Fluxo de autenticação
+1. usuário acessa a tela de login;
+2. envia credenciais;
+3. backend valida os dados;
+4. tokens de sessão são gerenciados;
+5. frontend mantém o estado autenticado.
+
+### 2. Fluxo de gestão de ativos
+1. usuário cadastra um ativo;
+2. ativo é persistido no banco;
+3. sistema permite listar, editar e excluir registros;
+4. os ativos podem ser utilizados nas análises.
+
+### 3. Fluxo de cálculo de valuation
+1. usuário escolhe um método;
+2. preenche os dados necessários;
+3. frontend envia os dados para a API;
+4. backend executa o cálculo;
+5. resultado é retornado e exibido na interface;
+6. a persistência das análises está em fase de consolidação conforme as migrations da app `valuation`.
+
+---
+
+## 🌐 Endpoints Principais
+
+### Auth
+- `POST /api/auth/login/`
+- `POST /api/auth/refresh/`
+- `POST /api/auth/logout/`
+- `GET /api/auth/me/`
+
+### Assets
+- `GET /api/assets/`
+- `POST /api/assets/`
+- `PUT /api/assets/{id}/`
+- `DELETE /api/assets/{id}/`
+
+### Valuation
+- `POST /api/valuation/graham/`
+- `POST /api/valuation/projected/`
+- `POST /api/valuation/barsi/`
+
+---
+
+## 🧱 Modelos Principais
+
+### Assets
+- `Asset`
+- `Dividend`
+
+### Valuation
+- `GrahamAnalysis`
+- `ProjectedAnalysis`
+- `BarsiAnalysis`
+
+---
+
+## 📁 Estrutura do Projeto
 
 ```text
-InvestSmart
-├── .github/
+InvestSmart/
 ├── backend/
-│   ├── assets/
-│   │   ├── calculators/
-│   │   │   ├── barsi_method.py
-│   │   │   ├── graham_method.py
-│   │   │   └── projected_method.py
-│   │   ├── migrations/
-│   │   ├── templates/
-│   │   │   └── assets/
-│   │   ├── tests/
-│   │   ├── admin.py
-│   │   ├── apps.py
-│   │   ├── forms.py
-│   │   ├── models.py
-│   │   ├── tests.py
-│   │   ├── urls.py
-│   │   └── views.py
+│   ├── apps/
+│   │   ├── accounts/
+│   │   │   ├── api/
+│   │   │   ├── services.py
+│   │   │   └── apps.py
+│   │   ├── assets/
+│   │   │   ├── api/
+│   │   │   ├── models.py
+│   │   │   └── apps.py
+│   │   ├── valuation/
+│   │   │   ├── api/
+│   │   │   ├── services/
+│   │   │   ├── models.py
+│   │   │   └── apps.py
+│   │   └── __init__.py
 │   ├── config/
-│   │   ├── settings.py
-│   │   ├── urls.py
-│   │   ├── asgi.py
-│   │   └── wsgi.py
-│   ├── core/
-│   ├── Dockerfile
-│   └── manage.py
+│   ├── manage.py
+│   └── requirements.txt
+├── frontend/
+│   ├── src/
+│   │   ├── app/
+│   │   ├── components/
+│   │   ├── contexts/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   ├── styles.css
+│   │   └── main.jsx
+│   ├── package.json
+│   └── vite.config.js
 ├── docker-compose.yml
-├── requirements.txt
-├── sonar-project.properties
-└── README.md
+├── README.md
+└── .env.example
 ```
 
 ---
 
-## 🌐 Rotas Públicas Atuais
+## 🖥️ Estado Atual do Frontend
 
-## Ativos
-- `GET /assets/` → lista de ativos;
-- `GET /assets/create/` → cadastro de ativo;
-- `GET /assets/<id>/update/` → edição de ativo;
-- `GET /assets/<id>/delete/` → remoção de ativo.
+O frontend foi reorganizado para uma estrutura em **React**, com foco em:
 
-## Calculadoras
-- `GET /assets/calculator/` → página principal das calculadoras;
-- `GET /assets/barsi/` → calculadora do método Barsi;
-- `GET /assets/graham/` → calculadora do método Graham;
-- `GET /assets/projected/` → calculadora do preço teto projetivo.
+- componentização;
+- separação de páginas;
+- integração com API REST;
+- contexto centralizado de autenticação;
+- crescimento futuro para rotas protegidas, dashboard e simulador.
 
-## Administração
-- `GET /admin/` → painel administrativo do Django.
+### Fluxo atual esperado
 
-> **Nota:** as rotas públicas de autenticação ainda estão em fase de implementação e integração, por isso não entram nesta lista como funcionalidades concluídas.
-
----
-
-## 🗄️ Modelagem de Dados Atual
-
-## Asset
-Representa um ativo financeiro.
-
-### Campos principais
-- `ticker`
-- `name`
-- `sector`
-- `current_price`
-- `created_at`
+1. o usuário acessa `/login`;
+2. realiza autenticação;
+3. é redirecionado para a página principal;
+4. escolhe o método de cálculo;
+5. preenche o formulário;
+6. envia os dados para a API;
+7. recebe o resultado na própria interface.
 
 ---
 
-## Dividend
-Armazena o histórico de dividendos pagos por um ativo.
+## ⚠️ Status Atual do Desenvolvimento
 
-### Relacionamento
-```text
-Asset 1 ---- N Dividend
-```
+### Já funcionando no projeto
 
-### Campos principais
-- `asset`
-- `value`
-- `payment_date`
-- `created_at`
+- estrutura backend organizada por domínio;
+- CRUD de ativos;
+- cálculo dos métodos **Graham**, **Barsi** e **Projetivo**;
+- integração entre backend e banco PostgreSQL;
+- navegação para as calculadoras;
+- base de autenticação em evolução;
+- integração de qualidade com SonarCloud;
+- uso de Docker para banco de dados local;
+- organização geral do projeto para evolução contínua.
 
----
+### Pontos em consolidação
 
-## BarsiAnalysis
-Armazena o resultado das análises pelo método Barsi.
+- estabilização completa do fluxo de login/logout/refresh token;
+- persistência total das análises de valuation conforme migrations;
+- histórico de análises por usuário;
+- proteção integral das rotas autenticadas;
+- sincronização completa entre backend e frontend reestruturado.
 
-### Relacionamento
-```text
-Asset 1 ---- N BarsiAnalysis
-```
+### Próximas entregas previstas
 
-### Campos principais
-- `asset`
-- `annual_dividend`
-- `current_price`
-- `target_yield`
-- `price_ceiling`
-- `margin`
-- `opportunity`
-- `created_at`
-
----
-
-## GrahamAnalysis
-Armazena o resultado das análises pelo método Graham.
-
-### Relacionamento
-```text
-Asset 1 ---- N GrahamAnalysis
-```
-
-### Campos principais
-- `asset`
-- `lpa`
-- `vpa`
-- `fair_price`
-- `created_at`
+- simulador de carteiras;
+- dashboards de dividendos e valuation;
+- integração com APIs externas de mercado;
+- alertas automáticos por preço teto;
+- testes unitários e de integração;
+- pipeline CI/CD completo;
+- deploy público estável;
+- observabilidade/monitoramento;
+- documentação complementar para apresentação final.
 
 ---
 
-## ProjectedAnalysis
-Armazena o resultado das análises pelo método projetivo.
+## 🧪 Como Executar o Projeto
 
-### Relacionamento
-```text
-Asset 1 ---- N ProjectedAnalysis
-```
-
-### Campos principais
-- `asset`
-- `dpa`
-- `average_dividend_yield`
-- `raw_price`
-- `price_ceiling`
-- `created_at`
-
----
-
-## 🔁 Fluxo das Calculadoras
-
-### Método Barsi
-```text
-Usuário
-   ↓
-Formulário Django
-   ↓
-BarsiCalculator
-   ↓
-Resultado salvo em BarsiAnalysis
-   ↓
-Histórico exibido na tela
-```
-
-### Método Graham
-```text
-Usuário
-   ↓
-Formulário Django
-   ↓
-Lógica de cálculo Graham
-   ↓
-Resultado salvo em GrahamAnalysis
-   ↓
-Histórico exibido na tela
-```
-
-### Método Projetivo
-```text
-Usuário
-   ↓
-Formulário Django
-   ↓
-Lógica de cálculo Projetivo
-   ↓
-Resultado salvo em ProjectedAnalysis
-   ↓
-Histórico exibido na tela
-```
-
----
-
-## ⚙️ Como Executar o Projeto
-
-## 1. Clonar o repositório
+### 1. Clonar o repositório
 
 ```bash
 git clone https://github.com/LucasCarvalhoSteffens/InvestSmart.git
 cd InvestSmart
 ```
 
-## 2. Criar e ativar o ambiente virtual
+### 2. Criar e ativar o ambiente virtual
 
+#### Windows
 ```bash
 python -m venv venv
-```
-
-### Windows
-```bash
 venv\Scripts\activate
 ```
 
-### Linux / macOS
+#### Linux / macOS
 ```bash
+python -m venv venv
 source venv/bin/activate
 ```
 
-## 3. Instalar as dependências
+### 3. Instalar as dependências do backend
 
 ```bash
-pip install -r requirements.txt
+pip install -r backend/requirements.txt
 ```
 
-## 4. Configurar o arquivo `.env`
+### 4. Configurar o arquivo `.env`
 
-Crie um arquivo `.env` na raiz do projeto com o seguinte conteúdo:
+Crie um arquivo `.env` na raiz do projeto com as variáveis abaixo:
 
 ```env
+SECRET_KEY_DJANGO=django-insecure-dev-key
+DEBUG=True
+
 POSTGRES_DB=investsmart
-POSTGRES_USER=investsmart_user
-POSTGRES_PASSWORD=investsmart_pass
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
 POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
-
-SECRET_KEY_DJANGO=your_secret_key
 ```
 
-## 5. Subir o banco de dados com Docker
+### 5. Subir o banco de dados com Docker
 
 ```bash
 docker compose up -d
 ```
 
-Para verificar o container:
-
-```bash
-docker ps
-```
-
-## 6. Entrar na pasta do backend
+### 6. Rodar as migrations
 
 ```bash
 cd backend
-```
-
-## 7. Gerar e aplicar migrations
-
-```bash
 python manage.py makemigrations
 python manage.py migrate
-```
-
-## 8. Criar superusuário
-
-```bash
 python manage.py createsuperuser
 ```
 
-## 9. Executar o servidor
+Se necessário, gere migrations específicas da app `valuation`:
+
+```bash
+python manage.py makemigrations valuation
+python manage.py migrate
+```
+
+### 7. Subir o backend
+
+Ainda dentro de `backend/`:
 
 ```bash
 python manage.py runserver
 ```
 
-## 10. Acessar a aplicação
+Backend disponível em:
 
-### Interface principal
 ```text
-http://127.0.0.1:8000/assets/
+http://127.0.0.1:8000
 ```
 
-### Calculadoras
-```text
-http://127.0.0.1:8000/assets/calculator/
+### 8. Instalar as dependências do frontend
+
+Em outro terminal:
+
+```bash
+cd frontend
+npm install
 ```
 
-### Admin
+### 9. Rodar o frontend
+
+```bash
+npm run dev
+```
+
+Frontend disponível em algo como:
+
+```text
+http://localhost:5173
+```
+
+---
+
+## 🧪 Como Testar o Projeto
+
+### Fluxo mínimo recomendado
+
+1. criar um usuário no Django;
+2. iniciar backend e frontend;
+3. fazer login no sistema;
+4. cadastrar pelo menos um ativo;
+5. testar os métodos:
+   - Graham
+   - Barsi
+   - Projetivo
+6. validar se os resultados estão sendo exibidos corretamente;
+7. validar no admin ou no banco se as análises estão sendo persistidas.
+
+### Acesso ao Admin
+
 ```text
 http://127.0.0.1:8000/admin/
 ```
 
 ---
 
-## 🧪 Testes
+## 🧰 Tecnologias Utilizadas
 
-Para executar os testes automatizados:
+### Backend
+- Python
+- Django
+- Django REST Framework
+- Simple JWT
+- PostgreSQL
+- psycopg2
 
-```bash
-python manage.py test
+### Frontend
+- React
+- Vite
+- React Router DOM
+- Axios
+
+### DevOps / Qualidade
+- Docker
+- Docker Compose
+- GitHub
+- GitHub Actions
+- SonarCloud
+
+### Engenharia de Software
+- Arquitetura em camadas
+- API REST
+- Separação por responsabilidade
+- Componentização
+- Evolução incremental
+- Base para TDD e testes automatizados
+- Documentação orientada ao RFC
+
+---
+
+## 📌 Boas Práticas Aplicadas
+
+- organização modular por domínio;
+- separação entre frontend e backend;
+- API REST desacoplada;
+- componentização no frontend;
+- organização em camadas;
+- uso de variáveis sensíveis fora do código-fonte;
+- autenticação baseada em token;
+- estrutura preparada para escalabilidade e manutenção;
+- uso de análise estática de código;
+- crescimento guiado por requisitos do RFC e pelas entregas do Portfólio.
+
+---
+
+## 📚 Documentação do Projeto
+
+A documentação do projeto contempla e/ou prevê:
+
+- requisitos funcionais e não funcionais;
+- casos de uso;
+- decisões arquiteturais;
+- diagramas de arquitetura;
+- instruções de execução;
+- histórico versionado no GitHub;
+- base para documentação complementar em Wiki/repositório;
+- material para apresentação no **Poster + Demo Day**.
+
+---
+
+## 📈 Roadmap
+
+### Curto prazo
+- concluir persistência das análises;
+- estabilizar autenticação com JWT e refresh token;
+- finalizar integração frontend ↔ backend;
+- exibir resultados e histórico de forma mais completa na interface.
+
+### Médio prazo
+- implementar simulador de carteiras;
+- integrar dados externos de mercado;
+- desenvolver dashboards de dividendos e valuation;
+- adicionar alertas automáticos por preço teto;
+- melhorar UX, feedbacks visuais e responsividade.
+
+### Longo prazo
+- deploy público em nuvem;
+- CI/CD com deploy automatizado;
+- monitoramento e observabilidade;
+- aumento da cobertura de testes;
+- evolução para comparações setoriais e projeções avançadas.
+
+---
+
+## 📝 Status do MVP
+
+O estado atual do MVP prioriza:
+
+- calculadora multimétodo;
+- organização sólida da arquitetura;
+- integração entre backend e banco de dados;
+- evolução do frontend em React;
+- base de autenticação;
+- crescimento incremental com foco em qualidade de software.
+
+---
+
+## 🔗 Repositório
+
+```text
+https://github.com/LucasCarvalhoSteffens/InvestSmart
 ```
-
-A estrutura de testes já existe no projeto e pode ser expandida conforme a evolução do sistema.
-
----
-
-## 🐘 Banco de Dados
-
-O banco é executado em container Docker com PostgreSQL.
-
-### Configuração atual do container
-- imagem: `postgres:15`
-- nome do container: `investsmart_db`
-- porta: `5432:5432`
-
-### Acessar manualmente o banco
-
-```bash
-docker exec -it investsmart_db psql -U investsmart_user -d investsmart
-```
-
-### Exemplo de consulta de usuários
-
-```sql
-SELECT username, email, is_superuser
-FROM auth_user;
-```
-
----
-
-## 🔍 Qualidade de Código
-
-O projeto já possui configuração para análise com **SonarCloud**.
-
-### Configuração atual
-- **Project Key:** `LucasCarvalhoSteffens_InvestSmart`
-- **Organization:** `lucascarvalhosteffens`
-- **Sources:** `backend`
-- **Python version:** `3.11`
-
----
-
-## 📌 Status Atual do Projeto
-
-### Concluído no estado atual da branch principal
-- CRUD de ativos;
-- persistência em PostgreSQL;
-- método Barsi;
-- método Graham;
-- método Projetivo;
-- histórico de análises;
-- Django Admin;
-- Docker Compose para banco;
-- integração com SonarCloud;
-- estrutura de testes em evolução.
-
-### Em desenvolvimento
-- login de usuários;
-- autenticação com JWT;
-- fluxo com refresh token;
-- proteção de rotas autenticadas;
-- associação de funcionalidades por usuário;
-- ampliação do fluxo de autenticação para o sistema completo.
-
----
-
-## 🛣️ Roadmap
-
-Próximas evoluções planejadas para o projeto:
-
-- finalizar o fluxo de login e autenticação;
-- concluir a integração de **access token + refresh token**;
-- proteger páginas e funcionalidades restritas;
-- associar análises e futuras carteiras aos usuários autenticados;
-- ampliar testes automatizados;
-- integrar APIs financeiras externas;
-- preencher dados de ativos automaticamente;
-- criar dashboards com indicadores fundamentalistas;
-- permitir comparação entre empresas e entre métodos;
-- implementar simulador de carteira;
-- gerar alertas de preço teto;
-- realizar deploy em nuvem;
-- evoluir observabilidade e monitoramento.
-
----
-
-## 🎓 Contexto Acadêmico
-
-O **InvestSmart** é desenvolvido como projeto de **Portfólio em Engenharia de Software**, com foco em:
-
-- organização arquitetural;
-- evolução incremental;
-- qualidade de código;
-- uso de banco relacional;
-- versionamento contínuo;
-- documentação técnica;
-- aderência a boas práticas de engenharia de software.
-
-Além do valor técnico, o projeto busca entregar uma solução útil para estudo e apoio à análise fundamentalista de investimentos.
-
----
-
-## 👨‍💻 Autor
-
-**Lucas de Carvalho Steffens**
-
-- GitHub: [LucasCarvalhoSteffens](https://github.com/LucasCarvalhoSteffens)
