@@ -26,8 +26,9 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
 
-    "assets",
-    "accounts",
+    "apps.accounts",
+    "apps.assets",
+    "apps.valuation",
 ]
 
 # Middlewares
@@ -108,6 +109,12 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:5173",
+    "http://localhost:5173",
+]
+
+CORS_ALLOW_CREDENTIALS = True
 
 # Login / logout
 LOGIN_URL = "/accounts/login/"
