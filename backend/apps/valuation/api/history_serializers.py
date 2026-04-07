@@ -1,9 +1,10 @@
 from rest_framework import serializers
 from apps.valuation.models import BarsiAnalysis, GrahamAnalysis, ProjectedAnalysis
 
+asset__ticker = "asset.ticker"
 
 class GrahamAnalysisSerializer(serializers.ModelSerializer):
-    asset_ticker = serializers.CharField(source="asset.ticker", read_only=True)
+    asset_ticker = serializers.CharField(source=asset__ticker, read_only=True)
 
     class Meta:
         model = GrahamAnalysis
@@ -11,7 +12,7 @@ class GrahamAnalysisSerializer(serializers.ModelSerializer):
 
 
 class ProjectedAnalysisSerializer(serializers.ModelSerializer):
-    asset_ticker = serializers.CharField(source="asset.ticker", read_only=True)
+    asset_ticker = serializers.CharField(source=asset__ticker, read_only=True)
 
     class Meta:
         model = ProjectedAnalysis
@@ -19,7 +20,7 @@ class ProjectedAnalysisSerializer(serializers.ModelSerializer):
 
 
 class BarsiAnalysisSerializer(serializers.ModelSerializer):
-    asset_ticker = serializers.CharField(source="asset.ticker", read_only=True)
+    asset_ticker = serializers.CharField(source=asset__ticker, read_only=True)
 
     class Meta:
         model = BarsiAnalysis

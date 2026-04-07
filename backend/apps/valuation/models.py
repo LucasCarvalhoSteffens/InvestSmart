@@ -1,9 +1,10 @@
 from django.db import models
 
+asset__Asset = "assets.Asset"
 
 class BaseAnalysis(models.Model):
     asset = models.ForeignKey(
-        "assets.Asset",
+        asset__Asset,
         on_delete=models.CASCADE,
     )
     created_at = models.DateTimeField(auto_now_add=True)
@@ -15,7 +16,7 @@ class BaseAnalysis(models.Model):
 
 class BarsiAnalysis(BaseAnalysis):
     asset = models.ForeignKey(
-        "assets.Asset",
+        asset__Asset,
         on_delete=models.CASCADE,
         related_name="barsi_analyses",
     )
@@ -37,7 +38,7 @@ class BarsiAnalysis(BaseAnalysis):
 
 class GrahamAnalysis(BaseAnalysis):
     asset = models.ForeignKey(
-        "assets.Asset",
+        asset__Asset,
         on_delete=models.CASCADE,
         related_name="graham_analyses",
     )
@@ -56,7 +57,7 @@ class GrahamAnalysis(BaseAnalysis):
 
 class ProjectedAnalysis(BaseAnalysis):
     asset = models.ForeignKey(
-        "assets.Asset",
+        asset__Asset,
         on_delete=models.CASCADE,
         related_name="projected_analyses",
     )
