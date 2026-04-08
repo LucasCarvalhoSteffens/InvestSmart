@@ -71,16 +71,20 @@ SIMPLE_JWT = {
 
 
 # CORS / CSRF
-CORS_ALLOWED_ORIGINS = env_list(
-    "CORS_ALLOWED_ORIGINS",
-    "http://127.0.0.1:5173,http://localhost:5173",
-)
-CORS_ALLOW_CREDENTIALS = True
+if DEBUG:
+    CORS_ALLOWED_ORIGINS = env_list(
+        "CORS_ALLOWED_ORIGINS",
+        "http://127.0.0.1:5173,http://localhost:5173",
+    )
+    CSRF_TRUSTED_ORIGINS = env_list(
+        "CSRF_TRUSTED_ORIGINS",
+        "http://127.0.0.1:5173,http://localhost:5173",
+    )
+else:
+    CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", "")
+    CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", "")
 
-CSRF_TRUSTED_ORIGINS = env_list(
-    "CSRF_TRUSTED_ORIGINS",
-    "http://127.0.0.1:5173,http://localhost:5173",
-)
+CORS_ALLOW_CREDENTIALS = True
 
 
 # Cookies de autenticação
