@@ -7,11 +7,12 @@
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=coverage)](https://sonarcloud.io/summary/new_code?id=LucasCarvalhoSteffens_InvestSmart)
 [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=LucasCarvalhoSteffens_InvestSmart)
 
-Plataforma web para **análise fundamentalista de ações** e evolução para **simulação de carteiras de investimento**, desenvolvida com **Django REST Framework**, **React** e **PostgreSQL**.
+Plataforma web para **análise fundamentalista de ações**, com **calculadora multimétodo de valuation**, **autenticação JWT com refresh token**, **persistência de análises** e evolução para **simulação de carteiras de investimento**.
 
-O projeto foi idealizado para reunir, em um único ambiente, funcionalidades que normalmente estão espalhadas em diferentes plataformas de mercado, com foco em **valuation**, **investimento em dividendos**, **comparação entre métodos de precificação** e futura **simulação de carteiras**.
+O projeto foi desenvolvido para concentrar, em um único ambiente, funcionalidades que normalmente ficam espalhadas em diferentes plataformas do mercado, com foco em **valuation**, **investimento em dividendos**, **comparação entre métodos de precificação** e futura **simulação de carteiras**.
 
 > **Status do projeto:** em desenvolvimento  
+> **Estado descrito neste README:** reflete a branch **Dev**  
 > **Natureza do projeto:** acadêmico/profissional, desenvolvido para a disciplina de **Portfólio** em **Engenharia de Software**  
 > **Observação:** esta aplicação tem caráter educacional e de apoio à análise, não constituindo recomendação de investimento.
 
@@ -24,6 +25,8 @@ O **InvestSmart** busca oferecer uma experiência unificada para investidores pe
 - cálculo de preço justo por múltiplos métodos;
 - comparação entre abordagens de valuation;
 - centralização de análises em uma única plataforma;
+- persistência e histórico de cálculos;
+- autenticação e organização das análises por fluxo protegido;
 - evolução para simulador de carteiras;
 - visualização futura de dashboards de dividendos, valuation e projeções;
 - apoio educacional no estudo de análise fundamentalista.
@@ -47,12 +50,16 @@ O **InvestSmart** foi proposto para reduzir essa fragmentação e concentrar os 
 ## ✨ Principais Diferenciais
 
 - **Calculadora multimétodo integrada** em uma única plataforma;
+- **Autenticação com JWT + refresh token** já estruturada;
+- **Refresh token com cookie HTTP-only** e renovação automática do access token;
+- **Carregamento do perfil do usuário autenticado** no frontend;
+- **Rotas protegidas no frontend**;
+- **Persistência automática das análises** no backend;
+- **Endpoints de histórico** para Graham, Barsi e Projetivo;
 - **Arquitetura modular** para facilitar manutenção e evolução;
 - **Backend desacoplado do frontend** via API REST;
-- **Autenticação com JWT e refresh token** em evolução;
-- **Base preparada para histórico de análises** e associação por usuário;
-- **Estrutura pronta para simulador de carteiras**, alertas e dashboards;
-- **Integração com ferramentas de qualidade**, como SonarCloud;
+- **Integração com SonarCloud** para qualidade contínua;
+- **Base pronta para simulador de carteiras, alertas e dashboards**;
 - **Foco em boas práticas de Engenharia de Software**, com separação por responsabilidade, organização em camadas e crescimento incremental.
 
 ---
@@ -63,13 +70,13 @@ O projeto segue uma arquitetura **client-server em camadas**, conforme definido 
 
 ### Stack principal
 
-- **Frontend:** React
-- **Backend:** Django REST Framework
+- **Frontend:** React + Vite
+- **Backend:** Django + Django REST Framework
 - **Banco de Dados:** PostgreSQL
 - **Autenticação:** JWT com access token e refresh token
 - **Comunicação:** API REST
-- **Infraestrutura local:** Docker / Docker Compose
 - **Qualidade:** SonarCloud
+- **Infraestrutura local:** Docker / Docker Compose
 - **Versionamento:** GitHub
 
 ### Camadas
@@ -87,8 +94,9 @@ O projeto segue uma arquitetura **client-server em camadas**, conforme definido 
 Utilizado para cálculo de preço justo com base em indicadores fundamentalistas clássicos.
 
 **Entradas principais:**
-- LPA
-- VPA
+- ativo;
+- LPA;
+- VPA.
 
 **Fórmula base:**
 ```text
@@ -96,7 +104,7 @@ Preço Justo = √(22.5 × LPA × VPA)
 ```
 
 **Saída principal:**
-- preço justo estimado
+- preço justo estimado.
 
 ---
 
@@ -105,23 +113,23 @@ Preço Justo = √(22.5 × LPA × VPA)
 Método focado em dividendos, calculando o preço teto com base no dividendo anual e no dividend yield alvo.
 
 **Entradas principais:**
-- dividendos informados
-- cotação atual
-- dividend yield alvo
+- ativo;
+- preço atual;
+- dividend yield alvo;
+- dividendos informados.
 
 **Lógica base:**
 ```text
 Dividendo Anual = soma dos dividendos informados
 Preço Teto = Dividendo Anual / Dividend Yield Alvo
-Margem = Preço Teto - Cotação Atual
+Margem = Preço Teto - Preço Atual
 ```
 
 **Saídas principais:**
-- dividendo anual
-- dividend yield atual
-- preço teto
-- margem
-- indicação de oportunidade de compra
+- dividendo anual;
+- preço teto;
+- margem;
+- indicação de oportunidade.
 
 ---
 
@@ -130,8 +138,9 @@ Margem = Preço Teto - Cotação Atual
 Método voltado para projeção do preço teto com base em dividendo por ação e dividend yield médio.
 
 **Entradas principais:**
-- DPA
-- dividend yield médio
+- ativo;
+- DPA;
+- dividend yield médio.
 
 **Lógica base:**
 ```text
@@ -139,95 +148,124 @@ Preço Teto = DPA / Dividend Yield Médio
 ```
 
 **Saídas principais:**
-- preço bruto estimado
-- preço teto ajustado
+- preço bruto estimado;
+- preço teto ajustado.
 
 ---
 
-## ✅ Funcionalidades Implementadas
+## ✅ O que já está funcionando
 
 ### Backend
 
 - API REST modularizada em `apps`;
 - separação entre domínio de autenticação, ativos e valuation;
-- CRUD de ativos;
-- persistência relacional com PostgreSQL;
+- configuração com **Django REST Framework** e **Simple JWT**;
+- proteção padrão das APIs com autenticação JWT;
+- uso de **PostgreSQL** no ambiente principal;
+- configuração de ambiente de testes com **SQLite em memória**;
+- CRUD de ativos via `ViewSet`;
+- persistência relacional com banco de dados;
 - endpoints de cálculo para:
   - **Graham**
   - **Barsi**
   - **Preço Teto Projetivo**
-- estrutura para persistência de análises;
+- persistência automática das análises realizadas;
+- endpoints de histórico para:
+  - **Graham**
+  - **Barsi**
+  - **Projetivo**
 - uso de Django Admin para administração dos dados;
 - organização preparada para expansão de regras de negócio.
+
+### Autenticação
+
+- login via API;
+- refresh token via API;
+- logout via API;
+- endpoint `/auth/me/` para obter o usuário autenticado;
+- geração de access token e refresh token;
+- refresh token configurado em cookie **HTTP-only**;
+- suporte a rotação de refresh token;
+- limpeza de sessão local no frontend em caso de falha ou logout.
 
 ### Frontend
 
 - frontend reestruturado em **React**;
-- organização por páginas, serviços e contexto;
+- organização por `app`, `components`, `contexts`, `pages` e `services`;
+- `AuthProvider` para gerenciamento de sessão;
+- bootstrap automático da autenticação ao carregar a aplicação;
+- carregamento do perfil do usuário autenticado após refresh;
+- interceptor HTTP com renovação automática do access token;
+- rotas protegidas com `ProtectedRoute`;
+- layout principal com navegação entre páginas;
 - tela de login;
-- navegação principal para os métodos de cálculo;
+- tela inicial da calculadora multimétodo;
 - páginas individuais para:
   - **Graham**
   - **Barsi**
   - **Projetivo**
-- integração com o backend via API REST;
-- base para rotas protegidas;
-- fluxo inicial de autenticação em evolução.
+- componente para seleção de ativos;
+- componente para exibição dos resultados;
+- integração com o backend via API REST.
 
-### Segurança e organização
+### Qualidade e organização
 
-- uso de variáveis sensíveis via `.env`;
-- autenticação baseada em JWT em evolução;
-- separação entre credenciais e código-fonte;
-- base preparada para uso de refresh token;
-- estrutura desacoplada entre frontend e backend;
-- organização modular do código;
-- base preparada para testes automatizados e crescimento incremental.
+- workflow do **GitHub Actions** para **SonarCloud**;
+- análise de qualidade contínua no repositório;
+- métricas de:
+  - Quality Gate
+  - Bugs
+  - Vulnerabilities
+  - Code Smells
+  - Coverage
+  - Duplicated Lines
+- estrutura pronta para evolução de testes e cobertura.
 
 ---
 
-## 🔐 Autenticação
+## 🔐 Fluxo de Autenticação Atual
 
-A autenticação do sistema está sendo estruturada com foco em:
+O fluxo atual de autenticação do projeto funciona da seguinte forma:
 
-- **JWT Access Token**
-- **Refresh Token**
-- proteção de rotas no frontend
-- envio de `Authorization: Bearer <token>` para rotas protegidas
-- identificação do usuário autenticado via rota `/api/auth/me/`
-
-### Status atual da autenticação
-
-- fluxo de login já entrou no escopo implementado;
-- integração com refresh token foi trabalhada no projeto;
-- contexto de autenticação no frontend já faz parte da estrutura recente;
-- parte da estabilização do fluxo completo ainda está em andamento;
-- proteção completa por usuário e refinamento de sessão ainda seguem em evolução.
+1. o usuário acessa a tela de login;
+2. envia usuário e senha;
+3. o backend valida as credenciais;
+4. o sistema retorna o access token e controla o refresh token;
+5. o frontend salva o access token em memória;
+6. ao iniciar a aplicação, o frontend tenta restaurar a sessão com `refresh`;
+7. após obter um token válido, o frontend chama `/auth/me/`;
+8. o usuário autenticado é carregado no contexto global;
+9. caso uma requisição autenticada retorne `401`, o interceptor tenta renovar o token automaticamente;
+10. se a renovação falhar, a sessão local é encerrada.
 
 ---
 
 ## 🔄 Fluxos Principais do Sistema
 
 ### 1. Fluxo de autenticação
-1. usuário acessa a tela de login;
+1. usuário acessa `/login`;
 2. envia credenciais;
 3. backend valida os dados;
 4. tokens de sessão são gerenciados;
-5. frontend mantém o estado autenticado.
+5. frontend mantém o estado autenticado;
+6. perfil do usuário autenticado é carregado;
+7. as rotas internas passam a ficar acessíveis.
 
 ### 2. Fluxo de gestão de ativos
-1. usuário cadastra um ativo;
-2. ativo é persistido no banco;
-3. sistema permite listar, editar e excluir registros;
-4. os ativos podem ser utilizados nas análises.
+1. o ativo é cadastrado via backend;
+2. o ativo é persistido no banco;
+3. o frontend consome a lista de ativos;
+4. os ativos ficam disponíveis para os cálculos nas páginas de valuation.
 
 ### 3. Fluxo de cálculo de valuation
 1. usuário escolhe um método;
-2. preenche os dados necessários;
-3. frontend envia os dados para a API;
-4. backend executa o cálculo;
-5. resultado é retornado e exibido na interface;
-6. a persistência das análises está em fase de consolidação conforme as migrations da app `valuation`.
+2. seleciona um ativo;
+3. preenche os dados necessários;
+4. frontend envia os dados para a API;
+5. backend executa o cálculo;
+6. backend persiste a análise correspondente;
+7. resultado é retornado e exibido na interface;
+8. a análise fica disponível para histórico no backend.
 
 ---
 
@@ -243,12 +281,18 @@ A autenticação do sistema está sendo estruturada com foco em:
 - `GET /api/assets/`
 - `POST /api/assets/`
 - `PUT /api/assets/{id}/`
+- `PATCH /api/assets/{id}/`
 - `DELETE /api/assets/{id}/`
 
 ### Valuation
 - `POST /api/valuation/graham/`
 - `POST /api/valuation/projected/`
 - `POST /api/valuation/barsi/`
+
+### Histórico
+- `GET /api/valuation/graham/history/`
+- `GET /api/valuation/projected/history/`
+- `GET /api/valuation/barsi/history/`
 
 ---
 
@@ -269,105 +313,120 @@ A autenticação do sistema está sendo estruturada com foco em:
 
 ```text
 InvestSmart/
+├── .github/
+│   └── workflows/
+│       └── sonar.yml
 ├── backend/
 │   ├── apps/
 │   │   ├── accounts/
 │   │   │   ├── api/
+│   │   │   ├── migrations/
+│   │   │   ├── tests/
+│   │   │   ├── admin.py
+│   │   │   ├── apps.py
 │   │   │   ├── services.py
-│   │   │   └── apps.py
+│   │   │   └── urls.py
 │   │   ├── assets/
 │   │   │   ├── api/
-│   │   │   ├── models.py
-│   │   │   └── apps.py
+│   │   │   ├── migrations/
+│   │   │   ├── tests/
+│   │   │   ├── admin.py
+│   │   │   ├── apps.py
+│   │   │   └── models.py
 │   │   ├── valuation/
 │   │   │   ├── api/
+│   │   │   ├── migrations/
 │   │   │   ├── services/
-│   │   │   ├── models.py
-│   │   │   └── apps.py
+│   │   │   ├── tests/
+│   │   │   ├── admin.py
+│   │   │   ├── apps.py
+│   │   │   └── models.py
 │   │   └── __init__.py
 │   ├── config/
-│   ├── manage.py
-│   └── requirements.txt
+│   │   ├── settings.py
+│   │   ├── settings_test.py
+│   │   └── urls.py
+│   ├── core/
+│   ├── Dockerfile
+│   └── manage.py
 ├── frontend/
+│   ├── public/
 │   ├── src/
 │   │   ├── app/
+│   │   │   ├── App.jsx
+│   │   │   └── routes.jsx
 │   │   ├── components/
 │   │   ├── contexts/
 │   │   ├── pages/
 │   │   ├── services/
-│   │   ├── styles.css
-│   │   └── main.jsx
+│   │   ├── App.css
+│   │   ├── App.jsx
+│   │   ├── index.css
+│   │   ├── main.jsx
+│   │   └── styles.css
 │   ├── package.json
 │   └── vite.config.js
+├── .env.example
 ├── docker-compose.yml
-├── README.md
-└── .env.example
+├── requirements.txt
+├── sonar-project.properties
+└── README.md
 ```
 
 ---
 
-## 🖥️ Estado Atual do Frontend
+## 🖥️ Rotas do Frontend
 
-O frontend foi reorganizado para uma estrutura em **React**, com foco em:
+### Públicas
+- `/login`
 
-- componentização;
-- separação de páginas;
-- integração com API REST;
-- contexto centralizado de autenticação;
-- crescimento futuro para rotas protegidas, dashboard e simulador.
-
-### Fluxo atual esperado
-
-1. o usuário acessa `/login`;
-2. realiza autenticação;
-3. é redirecionado para a página principal;
-4. escolhe o método de cálculo;
-5. preenche o formulário;
-6. envia os dados para a API;
-7. recebe o resultado na própria interface.
+### Protegidas
+- `/`
+- `/graham`
+- `/projected`
+- `/barsi`
 
 ---
 
-## ⚠️ Status Atual do Desenvolvimento
+## ⚙️ Variáveis de Ambiente
 
-### Já funcionando no projeto
+Crie um arquivo `.env` na raiz do projeto.
 
-- estrutura backend organizada por domínio;
-- CRUD de ativos;
-- cálculo dos métodos **Graham**, **Barsi** e **Projetivo**;
-- integração entre backend e banco PostgreSQL;
-- navegação para as calculadoras;
-- base de autenticação em evolução;
-- integração de qualidade com SonarCloud;
-- uso de Docker para banco de dados local;
-- organização geral do projeto para evolução contínua.
+### Exemplo base
+```env
+POSTGRES_DB=investsmart
+POSTGRES_USER=investsmart_user
+POSTGRES_PASSWORD=investsmart_pass
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+SECRET_KEY_DJANGO=your_secret_key
+DEBUG=True
+```
 
-### Pontos em consolidação
+### Recomendado para desenvolvimento local com frontend separado
+```env
+ALLOWED_HOSTS=127.0.0.1,localhost
+CORS_ALLOWED_ORIGINS=http://127.0.0.1:5173,http://localhost:5173
+CSRF_TRUSTED_ORIGINS=http://127.0.0.1:5173,http://localhost:5173
+AUTH_COOKIE_SECURE=False
+AUTH_COOKIE_SAMESITE=Lax
+AUTH_COOKIE_DOMAIN=
+```
 
-- estabilização completa do fluxo de login/logout/refresh token;
-- persistência total das análises de valuation conforme migrations;
-- histórico de análises por usuário;
-- proteção integral das rotas autenticadas;
-- sincronização completa entre backend e frontend reestruturado.
+### Variável opcional do frontend
+Se quiser definir explicitamente a URL base da API no frontend, crie um `.env` dentro de `frontend/`:
 
-### Próximas entregas previstas
+```env
+VITE_API_BASE_URL=http://127.0.0.1:8000/api
+```
 
-- simulador de carteiras;
-- dashboards de dividendos e valuation;
-- integração com APIs externas de mercado;
-- alertas automáticos por preço teto;
-- testes unitários e de integração;
-- pipeline CI/CD completo;
-- deploy público estável;
-- observabilidade/monitoramento;
-- documentação complementar para apresentação final.
+> Se essa variável não for definida, o frontend já utiliza `http://127.0.0.1:8000/api` como padrão.
 
 ---
 
 ## 🧪 Como Executar o Projeto
 
 ### 1. Clonar o repositório
-
 ```bash
 git clone https://github.com/LucasCarvalhoSteffens/InvestSmart.git
 cd InvestSmart
@@ -388,50 +447,28 @@ source venv/bin/activate
 ```
 
 ### 3. Instalar as dependências do backend
-
 ```bash
-pip install -r backend/requirements.txt
+pip install -r requirements.txt
 ```
 
-### 4. Configurar o arquivo `.env`
-
-Crie um arquivo `.env` na raiz do projeto com as variáveis abaixo:
-
-```env
-SECRET_KEY_DJANGO=django-insecure-dev-key
-DEBUG=True
-
-POSTGRES_DB=investsmart
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=postgres
-POSTGRES_HOST=localhost
-POSTGRES_PORT=5432
-```
-
-### 5. Subir o banco de dados com Docker
-
+### 4. Subir o banco de dados com Docker
 ```bash
 docker compose up -d
 ```
 
-### 6. Rodar as migrations
-
+### 5. Aplicar as migrations
 ```bash
 cd backend
 python manage.py makemigrations
 python manage.py migrate
+```
+
+### 6. Criar um superusuário (opcional, mas recomendado)
+```bash
 python manage.py createsuperuser
 ```
 
-Se necessário, gere migrations específicas da app `valuation`:
-
-```bash
-python manage.py makemigrations valuation
-python manage.py migrate
-```
-
 ### 7. Subir o backend
-
 Ainda dentro de `backend/`:
 
 ```bash
@@ -445,7 +482,6 @@ http://127.0.0.1:8000
 ```
 
 ### 8. Instalar as dependências do frontend
-
 Em outro terminal:
 
 ```bash
@@ -454,7 +490,6 @@ npm install
 ```
 
 ### 9. Rodar o frontend
-
 ```bash
 npm run dev
 ```
@@ -471,22 +506,50 @@ http://localhost:5173
 
 ### Fluxo mínimo recomendado
 
-1. criar um usuário no Django;
-2. iniciar backend e frontend;
+1. iniciar backend e frontend;
+2. criar ou ter um usuário válido;
 3. fazer login no sistema;
-4. cadastrar pelo menos um ativo;
-5. testar os métodos:
+4. validar a restauração da sessão;
+5. validar o carregamento do perfil do usuário autenticado;
+6. garantir que existam ativos cadastrados;
+7. acessar as páginas:
    - Graham
-   - Barsi
    - Projetivo
-6. validar se os resultados estão sendo exibidos corretamente;
-7. validar no admin ou no banco se as análises estão sendo persistidas.
+   - Barsi
+8. executar os cálculos;
+9. validar se os resultados estão sendo exibidos corretamente;
+10. validar no Admin ou no banco se as análises estão sendo persistidas;
+11. validar os endpoints de histórico, se desejado.
 
 ### Acesso ao Admin
-
 ```text
 http://127.0.0.1:8000/admin/
 ```
+
+---
+
+## 🧪 Testes Automatizados
+
+O projeto possui configuração específica para testes com `settings_test.py`.
+
+### Rodar testes
+```bash
+cd backend
+python manage.py test --settings=config.settings_test
+```
+
+### Rodar com coverage
+```bash
+coverage run manage.py test --settings=config.settings_test
+coverage report
+coverage xml
+```
+
+### Ambiente de testes
+O ambiente de testes utiliza:
+- **SQLite em memória**;
+- hasher simplificado para senhas;
+- ajustes de segurança desabilitados para facilitar a execução local dos testes.
 
 ---
 
@@ -498,13 +561,15 @@ http://127.0.0.1:8000/admin/
 - Django REST Framework
 - Simple JWT
 - PostgreSQL
-- psycopg2
+- python-dotenv
+- django-cors-headers
 
 ### Frontend
 - React
 - Vite
 - React Router DOM
 - Axios
+- Context API
 
 ### DevOps / Qualidade
 - Docker
@@ -512,6 +577,7 @@ http://127.0.0.1:8000/admin/
 - GitHub
 - GitHub Actions
 - SonarCloud
+- Coverage.py
 
 ### Engenharia de Software
 - Arquitetura em camadas
@@ -530,10 +596,14 @@ http://127.0.0.1:8000/admin/
 - separação entre frontend e backend;
 - API REST desacoplada;
 - componentização no frontend;
-- organização em camadas;
+- contexto centralizado de autenticação;
+- rotas protegidas;
+- renovação automática de token no cliente;
 - uso de variáveis sensíveis fora do código-fonte;
-- autenticação baseada em token;
-- estrutura preparada para escalabilidade e manutenção;
+- autenticação baseada em JWT;
+- uso de cookie HTTP-only para refresh token;
+- persistência das análises no backend;
+- histórico de cálculos por endpoint dedicado;
 - uso de análise estática de código;
 - crescimento guiado por requisitos do RFC e pelas entregas do Portfólio.
 
@@ -556,38 +626,43 @@ A documentação do projeto contempla e/ou prevê:
 
 ## 📈 Roadmap
 
-### Curto prazo
-- concluir persistência das análises;
-- estabilizar autenticação com JWT e refresh token;
-- finalizar integração frontend ↔ backend;
-- exibir resultados e histórico de forma mais completa na interface.
-
-### Médio prazo
-- implementar simulador de carteiras;
-- integrar dados externos de mercado;
-- desenvolver dashboards de dividendos e valuation;
-- adicionar alertas automáticos por preço teto;
-- melhorar UX, feedbacks visuais e responsividade.
-
-### Longo prazo
-- deploy público em nuvem;
-- CI/CD com deploy automatizado;
-- monitoramento e observabilidade;
-- aumento da cobertura de testes;
-- evolução para comparações setoriais e projeções avançadas.
+### Próximas evoluções
+- interface para histórico de análises no frontend;
+- cadastro/edição de ativos diretamente pela interface web;
+- simulador de carteiras;
+- dashboards de dividendos e valuation;
+- integração com APIs externas de mercado;
+- alertas automáticos por preço teto;
+- ampliação dos testes automatizados;
+- pipeline CI/CD mais completo;
+- deploy público estável;
+- observabilidade e monitoramento;
+- melhorias contínuas de UX e responsividade.
 
 ---
 
 ## 📝 Status do MVP
 
-O estado atual do MVP prioriza:
+O estado atual do MVP já contempla:
 
-- calculadora multimétodo;
+- autenticação com login, logout, refresh e `/me`;
+- rotas protegidas no frontend;
+- bootstrap automático de sessão;
+- integração frontend ↔ backend funcional para autenticação;
+- cálculo dos métodos **Graham**, **Barsi** e **Projetivo**;
+- persistência das análises no banco;
+- endpoints de histórico no backend;
+- listagem de ativos para uso nos cálculos;
 - organização sólida da arquitetura;
-- integração entre backend e banco de dados;
-- evolução do frontend em React;
-- base de autenticação;
-- crescimento incremental com foco em qualidade de software.
+- base de qualidade com SonarCloud.
+
+---
+
+## 👨‍💻 Autor
+
+**Lucas de Carvalho Steffens**  
+Estudante de Engenharia de Software  
+GitHub: [LucasCarvalhoSteffens](https://github.com/LucasCarvalhoSteffens)
 
 ---
 
