@@ -80,7 +80,7 @@ class RefreshTokenAPIView(APIView):
 
 
 class LogoutAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def post(self, request):
         refresh_token = request.COOKIES.get(REFRESH_COOKIE_NAME)
@@ -92,9 +92,13 @@ class LogoutAPIView(APIView):
             except TokenError:
                 pass
 
-        logout(request)
+        if request.user and request.user.is_authenticated:
+            logout(request)
 
-        response = Response({"detail": "Logout realizado com sucesso."})
+        response = Response(
+            {"detail": "Logout realizado com sucesso."},
+            status=status.HTTP_200_OK,
+        )
         clear_refresh_cookie(response)
         return response
 

@@ -10,24 +10,12 @@ export async function refreshToken() {
   return data;
 }
 
-export async function getMe(access) {
-  const { data } = await http.get("/auth/me/", {
-    headers: {
-      Authorization: `Bearer ${access}`,
-    },
-  });
+export async function getMe() {
+  const { data } = await http.get("/auth/me/");
   return data;
 }
 
-export async function logout(access) {
-  const { data } = await http.post(
-    "/auth/logout/",
-    {},
-    {
-      headers: {
-        Authorization: `Bearer ${access}`,
-      },
-    }
-  );
+export async function logout() {
+  const { data } = await http.post("/auth/logout/");
   return data;
 }
