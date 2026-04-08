@@ -37,7 +37,7 @@ jobs:
       - name: Run tests with coverage
         working-directory: backend
         env:
-          SECRET_KEY_DJANGO: test-secret-key
+          SECRET_KEY_DJANGO: investsmart-test-secret-key-with-more-than-32-chars
           DEBUG: "True"
           POSTGRES_DB: test
           POSTGRES_USER: test
@@ -48,6 +48,11 @@ jobs:
           coverage run manage.py test --settings=config.settings_test
           coverage xml -o coverage.xml
           coverage report
+
+      - name: Debug coverage file
+        run: |
+          ls -R
+          test -f backend/coverage.xml && echo "coverage file found"
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
