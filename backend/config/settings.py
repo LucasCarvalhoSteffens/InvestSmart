@@ -7,11 +7,18 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
+def env_list(name, default=""):
+    value = os.getenv(name, default)
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
 # Segurança
 SECRET_KEY = os.getenv("SECRET_KEY_DJANGO")
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", "127.0.0.1,localhost")
+
 
 # Aplicações
 INSTALLED_APPS = [
@@ -21,15 +28,14 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
-
     "apps.accounts",
     "apps.assets",
     "apps.valuation",
 ]
+
 
 # Middlewares
 MIDDLEWARE = [
@@ -42,6 +48,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
 
 # DRF / JWT
 REST_FRAMEWORK = {
@@ -61,6 +68,24 @@ SIMPLE_JWT = {
     "UPDATE_LAST_LOGIN": True,
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
+
+
+# CORS / CSRF
+if DEBUG:
+    CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS")
+    CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS")
+else:
+    CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", "")
+    CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", "")
+
+CORS_ALLOW_CREDENTIALS = True
+
+
+# Cookies de autenticação
+AUTH_COOKIE_SECURE = os.getenv("AUTH_COOKIE_SECURE", "False") == "True"
+AUTH_COOKIE_SAMESITE = os.getenv("AUTH_COOKIE_SAMESITE", "Lax")
+AUTH_COOKIE_DOMAIN = os.getenv("AUTH_COOKIE_DOMAIN", "")
+
 
 # URLs / templates
 ROOT_URLCONF = "config.urls"
@@ -82,6 +107,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
+
 # Banco de dados
 DATABASES = {
     "default": {
@@ -93,6 +119,7 @@ DATABASES = {
         "PORT": os.getenv("POSTGRES_PORT", "5432"),
     }
 }
+
 
 # Validação de senha
 AUTH_PASSWORD_VALIDATORS = [
@@ -109,31 +136,32 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
-CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:5173",
-    "http://localhost:5173",
-]
 
-CORS_ALLOW_CREDENTIALS = True
 
 # Login / logout
 LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/assets/"
 LOGOUT_REDIRECT_URL = "/accounts/login/"
 
+
 # Segurança para dev e prod
 CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_SAMESITE = "Lax"
+
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
 
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
 else:
     SECURE_SSL_REDIRECT = False
+
 
 # Internacionalização
 LANGUAGE_CODE = "pt-br"
@@ -141,7 +169,9 @@ TIME_ZONE = "America/Sao_Paulo"
 USE_I18N = True
 USE_TZ = True
 
+
 # Arquivos estáticos
 STATIC_URL = "static/"
+
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
