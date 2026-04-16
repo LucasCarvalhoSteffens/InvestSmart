@@ -45,7 +45,7 @@ jobs:
           POSTGRES_HOST: localhost
           POSTGRES_PORT: 5432
         run: |
-          coverage run backend/manage.py test apps.accounts.tests apps.assets.tests apps.valuation.tests apps.portfolio.tests --settings=config.settings_test --verbosity 2
+          coverage run backend/manage.py test apps.accounts.tests apps.assets.tests apps.valuation.tests apps.portfolios.tests --settings=config.settings_test --verbosity 2
           coverage xml -o backend/coverage.xml
           coverage report -m
 
