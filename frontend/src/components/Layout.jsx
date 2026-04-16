@@ -1,4 +1,4 @@
-import { Link, Outlet } from "react-router-dom";
+import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function Layout() {
@@ -14,17 +14,18 @@ export default function Layout() {
 
         <div className="topbar-right">
           <span className="user-badge">{user?.username}</span>
-          <button className="secondary-btn" onClick={signOut}>
+          <button className="secondary-btn small-btn" type="button" onClick={signOut}>
             Sair
           </button>
         </div>
       </header>
 
       <nav className="nav-links">
-        <Link to="/">Início</Link>
-        <Link to="/graham">Graham</Link>
-        <Link to="/projected">Projetivo</Link>
-        <Link to="/barsi">Barsi</Link>
+        <NavLink to="/">Início</NavLink>
+        <NavLink to="/graham">Graham</NavLink>
+        <NavLink to="/projetivo">Projetivo</NavLink>
+        <NavLink to="/barsi">Barsi</NavLink>
+        <NavLink to="/carteiras">Carteiras</NavLink>
       </nav>
 
       <main>
