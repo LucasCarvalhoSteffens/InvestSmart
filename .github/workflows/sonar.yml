@@ -19,7 +19,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -34,7 +35,7 @@ jobs:
           pip install coverage
           pip install -r requirements.txt
 
-      - name: Run tests with coverage
+      - name: Run all backend tests with coverage
         env:
           PYTHONPATH: backend
           SECRET_KEY_DJANGO: investsmart-test-secret-key-with-more-than-32-chars
@@ -45,16 +46,17 @@ jobs:
           POSTGRES_HOST: localhost
           POSTGRES_PORT: 5432
         run: |
-          coverage run backend/manage.py test apps.accounts.tests apps.assets.tests apps.valuation.tests --settings=config.settings_test --verbosity 2
+          coverage run backend/manage.py test --settings=config.settings_test --verbosity 2
           coverage xml -o backend/coverage.xml
           coverage report -m
 
       - name: Debug coverage file
         run: |
-          ls -R
+          ls -lah
+          ls -lah backend
           test -f backend/coverage.xml && echo "coverage file found"
 
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v2
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
