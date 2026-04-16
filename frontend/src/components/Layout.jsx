@@ -14,7 +14,7 @@ export default function Layout() {
 
         <div className="topbar-right">
           <span className="user-badge">{user?.username}</span>
-          <button className="secondary-btn small-btn" type="button" onClick={signOut}>
+          <button className="secondary-btn" onClick={signOut}>
             Sair
           </button>
         </div>

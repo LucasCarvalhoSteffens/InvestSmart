@@ -7,6 +7,7 @@ from rest_framework.test import APITestCase
 
 from apps.assets.models import Asset
 from apps.portfolios.models import Portfolio, PortfolioItem, PortfolioItemAlert
+from apps.valuation.models import BarsiAnalysis, GrahamAnalysis, ProjectedAnalysis
 
 User = get_user_model()
 
@@ -258,3 +259,140 @@ class PortfolioAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["id"], alert_2.id)
+    
+    def test_get_portfolio_simulation(self):
+        self.authenticate()
+
+        item_1 = PortfolioItem.objects.create(
+            portfolio=self.portfolio,
+            asset=self.asset_1,
+            quantity=10,
+            average_price=Decimal("20.00"),
+            target_price=Decimal("30.00"),
+        )
+        item_2 = PortfolioItem.objects.create(
+            portfolio=self.portfolio,
+            asset=self.asset_2,
+            quantity=5,
+            average_price=Decimal("50.00"),
+        )
+
+        ProjectedAnalysis.objects.create(
+            asset=self.asset_2,
+            dpa=Decimal("2.4000"),
+            average_dividend_yield=Decimal("0.0600"),
+            raw_price=Decimal("40.00"),
+            price_ceiling=Decimal("65.00"),
+        )
+
+        GrahamAnalysis.objects.create(
+            asset=self.asset_2,
+            lpa=Decimal("5.20"),
+            vpa=Decimal("44.10"),
+            fair_price=Decimal("71.82"),
+        )
+
+        response = self.client.get(
+            reverse("portfolios-simulation", args=[self.portfolio.id])
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["summary"]["portfolio_id"], self.portfolio.id)
+        self.assertEqual(response.data["summary"]["total_items"], 2)
+        self.assertEqual(response.data["summary"]["covered_items"], 2)
+        self.assertEqual(response.data["summary"]["opportunities_count"], 2)
+
+        first = response.data["items"][0]
+        self.assertIn("asset_ticker", first)
+        self.assertIn("price_ceiling", first)
+        self.assertIn("estimated_return_value", first)
+        self.assertIn("is_opportunity", first)
+
+        bbas3 = next(item for item in response.data["items"] if item["asset_ticker"] == "BBAS3")
+        self.assertEqual(str(bbas3["price_ceiling"]), "30.00")
+        self.assertEqual(bbas3["price_ceiling_source"], "manual")
+        self.assertTrue(bbas3["is_opportunity"])
+
+        wege3 = next(item for item in response.data["items"] if item["asset_ticker"] == "WEGE3")
+        self.assertEqual(str(wege3["price_ceiling"]), "65.00")
+        self.assertEqual(wege3["price_ceiling_source"], "projected")
+        self.assertEqual(str(wege3["graham_fair_price"]), "71.82")
+
+    def test_simulation_requires_authentication(self):
+        response = self.client.get(
+            reverse("portfolios-simulation", args=[self.portfolio.id])
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_user_cannot_access_other_users_portfolio_simulation(self):
+        item = PortfolioItem.objects.create(
+            portfolio=self.other_portfolio,
+            asset=self.asset_1,
+            quantity=10,
+            average_price=Decimal("20.00"),
+            target_price=Decimal("30.00"),
+        )
+
+        self.authenticate()
+
+        response = self.client.get(
+            reverse("portfolios-simulation", args=[self.other_portfolio.id])
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_simulation_returns_null_fields_when_item_has_no_analysis_and_no_manual_target(self):
+        self.authenticate()
+
+        PortfolioItem.objects.create(
+            portfolio=self.portfolio,
+            asset=self.asset_1,
+            quantity=10,
+            average_price=Decimal("20.00"),
+        )
+
+        response = self.client.get(
+            reverse("portfolios-simulation", args=[self.portfolio.id])
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["summary"]["total_items"], 1)
+        self.assertEqual(response.data["summary"]["covered_items"], 0)
+        self.assertEqual(response.data["summary"]["uncovered_items"], 1)
+
+        item = response.data["items"][0]
+        self.assertIsNone(item["price_ceiling"])
+        self.assertIsNone(item["price_ceiling_source"])
+        self.assertIsNone(item["estimated_return_value"])
+        self.assertFalse(item["is_opportunity"])
+
+    def test_simulation_uses_barsi_when_no_manual_or_projected_target_exists(self):
+        self.authenticate()
+
+        PortfolioItem.objects.create(
+            portfolio=self.portfolio,
+            asset=self.asset_1,
+            quantity=10,
+            average_price=Decimal("20.00"),
+        )
+
+        BarsiAnalysis.objects.create(
+            asset=self.asset_1,
+            annual_dividend=Decimal("1.6500"),
+            current_price=Decimal("27.50"),
+            target_yield=Decimal("0.0600"),
+            price_ceiling=Decimal("28.00"),
+            margin=Decimal("0.50"),
+            opportunity=True,
+        )
+
+        response = self.client.get(
+            reverse("portfolios-simulation", args=[self.portfolio.id])
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        item = response.data["items"][0]
+        self.assertEqual(str(item["price_ceiling"]), "28.00")
+        self.assertEqual(item["price_ceiling_source"], "barsi")
+        self.assertTrue(item["is_opportunity"])
