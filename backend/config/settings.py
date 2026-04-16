@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.assets",
     "apps.valuation",
+    "apps.portfolios",
 ]
 
 
