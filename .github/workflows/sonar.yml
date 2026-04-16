@@ -1,8 +1,25 @@
-runs-on: ubuntu-latest
+name: SonarCloud
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - Dev
+  pull_request:
+
+jobs:
+  sonarcloud:
+    name: SonarCloud Scan
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
-
         with:
           fetch-depth: 0
 
@@ -28,14 +45,13 @@ runs-on: ubuntu-latest
           POSTGRES_HOST: localhost
           POSTGRES_PORT: 5432
         run: |
-          coverage run backend/manage.py test apps.accounts.tests apps.assets.tests apps.valuation.tests apps.portfolios.tests --settings=config.settings_test --verbosity 2
+          coverage run backend/manage.py test apps.accounts.tests apps.assets.tests apps.valuation.tests apps.portfolio.tests --settings=config.settings_test --verbosity 2
           coverage xml -o backend/coverage.xml
           coverage report -m
 
       - name: Debug coverage file
         run: |
           ls -R
-
           test -f backend/coverage.xml && echo "coverage file found"
 
       - name: SonarCloud Scan
