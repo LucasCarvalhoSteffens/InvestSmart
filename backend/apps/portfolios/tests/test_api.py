@@ -157,3 +157,104 @@ class PortfolioAPITests(APITestCase):
         self.assertEqual(PortfolioItemAlert.objects.count(), 1)
         self.assertEqual(response.data["asset_ticker"], "WEGE3")
         self.assertTrue(response.data["triggered_now"])
+
+    def test_filter_items_by_portfolio_id(self):
+        self.authenticate()
+
+        second_portfolio = Portfolio.objects.create(
+            user=self.user,
+            name="Carteira Secundária",
+            description="Outra carteira",
+        )
+
+        item_1 = PortfolioItem.objects.create(
+            portfolio=self.portfolio,
+            asset=self.asset_1,
+            quantity=10,
+            average_price=Decimal("20.00"),
+        )
+        item_2 = PortfolioItem.objects.create(
+            portfolio=second_portfolio,
+            asset=self.asset_2,
+            quantity=8,
+            average_price=Decimal("50.00"),
+        )
+
+        response = self.client.get(self.items_url, {"portfolio_id": second_portfolio.id})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["id"], item_2.id)
+        self.assertNotEqual(response.data[0]["id"], item_1.id)
+
+    def test_filter_alerts_by_portfolio_item_id(self):
+        self.authenticate()
+
+        item_1 = PortfolioItem.objects.create(
+            portfolio=self.portfolio,
+            asset=self.asset_1,
+            quantity=10,
+            average_price=Decimal("20.00"),
+        )
+        item_2 = PortfolioItem.objects.create(
+            portfolio=self.portfolio,
+            asset=self.asset_2,
+            quantity=8,
+            average_price=Decimal("50.00"),
+        )
+
+        alert_1 = PortfolioItemAlert.objects.create(
+            portfolio_item=item_1,
+            alert_type=PortfolioItemAlert.AlertType.BELOW_OR_EQUAL,
+            threshold_price=Decimal("25.00"),
+        )
+        PortfolioItemAlert.objects.create(
+            portfolio_item=item_2,
+            alert_type=PortfolioItemAlert.AlertType.ABOVE_OR_EQUAL,
+            threshold_price=Decimal("65.00"),
+        )
+
+        response = self.client.get(self.alerts_url, {"portfolio_item_id": item_1.id})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["id"], alert_1.id)
+
+    def test_filter_alerts_by_portfolio_id(self):
+        self.authenticate()
+
+        second_portfolio = Portfolio.objects.create(
+            user=self.user,
+            name="Longo Prazo",
+            description="Carteira 2",
+        )
+
+        item_1 = PortfolioItem.objects.create(
+            portfolio=self.portfolio,
+            asset=self.asset_1,
+            quantity=10,
+            average_price=Decimal("20.00"),
+        )
+        item_2 = PortfolioItem.objects.create(
+            portfolio=second_portfolio,
+            asset=self.asset_2,
+            quantity=5,
+            average_price=Decimal("21.00"),
+        )
+
+        PortfolioItemAlert.objects.create(
+            portfolio_item=item_1,
+            alert_type=PortfolioItemAlert.AlertType.BELOW_OR_EQUAL,
+            threshold_price=Decimal("24.00"),
+        )
+        alert_2 = PortfolioItemAlert.objects.create(
+            portfolio_item=item_2,
+            alert_type=PortfolioItemAlert.AlertType.ABOVE_OR_EQUAL,
+            threshold_price=Decimal("30.00"),
+        )
+
+        response = self.client.get(self.alerts_url, {"portfolio_id": second_portfolio.id})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["id"], alert_2.id)
