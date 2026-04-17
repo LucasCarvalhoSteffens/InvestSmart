@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import AlertForm from "../components/AlertForm";
 import PortfolioForm from "../components/PortfolioForm";
 import PortfolioItemForm from "../components/PortfolioItemForm";
+import PortfolioSimulationPanel from "../components/PortfolioSimulationPanel";
 import PortfolioSummary from "../components/PortfolioSummary";
 import { useAuth } from "../contexts/AuthContext";
 import {
@@ -11,6 +12,7 @@ import {
   deletePortfolio,
   deletePortfolioAlert,
   deletePortfolioItem,
+  getPortfolioSimulation,
   listPortfolios,
   updatePortfolio,
   updatePortfolioItem,
@@ -103,6 +105,10 @@ export default function PortfoliosPage() {
   const [alertForms, setAlertForms] = useState({});
   const [alertSubmittingId, setAlertSubmittingId] = useState(null);
 
+  const [simulation, setSimulation] = useState(null);
+  const [simulationLoading, setSimulationLoading] = useState(false);
+  const [simulationError, setSimulationError] = useState("");
+
   const selectedPortfolio = useMemo(
     () =>
       portfolios.find((portfolio) => portfolio.id === selectedPortfolioId) ?? null,
@@ -150,6 +156,35 @@ export default function PortfoliosPage() {
     [accessToken],
   );
 
+  const loadSimulation = useCallback(
+    async (portfolioId) => {
+      if (!accessToken || !portfolioId) {
+        setSimulation(null);
+        setSimulationError("");
+        return;
+      }
+
+      try {
+        setSimulationLoading(true);
+        setSimulationError("");
+
+        const data = await getPortfolioSimulation(portfolioId, accessToken);
+        setSimulation(data);
+      } catch (error) {
+        setSimulation(null);
+        setSimulationError(
+          extractErrorMessage(
+            error,
+            "Não foi possível carregar a simulação da carteira.",
+          ),
+        );
+      } finally {
+        setSimulationLoading(false);
+      }
+    },
+    [accessToken],
+  );
+
   useEffect(() => {
     loadPortfolios();
   }, [loadPortfolios]);
@@ -159,6 +194,16 @@ export default function PortfoliosPage() {
     setItemEditingId(null);
     setAlertForms({});
   }, [selectedPortfolioId]);
+
+  useEffect(() => {
+    if (!selectedPortfolioId) {
+      setSimulation(null);
+      setSimulationError("");
+      return;
+    }
+
+    loadSimulation(selectedPortfolioId);
+  }, [selectedPortfolioId, loadSimulation]);
 
   function handlePortfolioFieldChange(event) {
     const { name, value } = event.target;
@@ -279,6 +324,7 @@ export default function PortfoliosPage() {
       }
 
       await loadPortfolios(selectedPortfolio.id);
+      await loadSimulation(selectedPortfolio.id);
       resetItemForm();
     } catch (error) {
       setPageError(
@@ -313,6 +359,7 @@ export default function PortfoliosPage() {
       setPageError("");
       await deletePortfolioItem(itemId, accessToken);
       await loadPortfolios(selectedPortfolio.id);
+      await loadSimulation(selectedPortfolio.id);
     } catch (error) {
       setPageError(
         extractErrorMessage(error, "Não foi possível excluir o item."),
@@ -405,7 +452,12 @@ export default function PortfoliosPage() {
         <button
           className="secondary-btn small-btn"
           type="button"
-          onClick={() => loadPortfolios(selectedPortfolioId)}
+          onClick={() => {
+            loadPortfolios(selectedPortfolioId);
+            if (selectedPortfolioId) {
+              loadSimulation(selectedPortfolioId);
+            }
+          }}
         >
           Atualizar
         </button>
@@ -481,6 +533,15 @@ export default function PortfoliosPage() {
 
         <section className="portfolio-content stack">
           <PortfolioSummary portfolio={selectedPortfolio} />
+
+          {selectedPortfolio ? (
+            <PortfolioSimulationPanel
+              simulation={simulation}
+              loading={simulationLoading}
+              error={simulationError}
+              onRefresh={() => loadSimulation(selectedPortfolio.id)}
+            />
+          ) : null}
 
           <PortfolioItemForm
             portfolioSelected={Boolean(selectedPortfolio)}

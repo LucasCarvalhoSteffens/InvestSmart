@@ -102,3 +102,12 @@ export async function updatePortfolioAlert(alertId, payload, access) {
 export async function deletePortfolioAlert(alertId, access) {
   await http.delete(`/portfolios/alerts/${alertId}/`, buildConfig(access));
 }
+
+export async function getPortfolioSimulation(portfolioId, access) {
+    const { data } = await http.get(
+      `/portfolios/${portfolioId}/simulation/`,
+      buildConfig(access),
+    );
+  
+    return data;
+  }
