@@ -63,6 +63,7 @@ export default function AssetAutocomplete({
     const nextValue = event.target.value.toUpperCase();
 
     setQuery(nextValue);
+    setError("");
 
     if (onChange) {
       onChange(nextValue);
@@ -73,6 +74,7 @@ export default function AssetAutocomplete({
     setQuery(asset.ticker);
     setSuggestions([]);
     setShowSuggestions(false);
+    setError("");
 
     if (onChange) {
       onChange(asset.ticker);
@@ -87,7 +89,7 @@ export default function AssetAutocomplete({
     <div className="form-group asset-autocomplete">
       <label>{label}</label>
 
-      <div style={{ position: "relative" }}>
+      <div className="autocomplete-wrapper">
         <input
           type="text"
           value={query}
@@ -101,9 +103,7 @@ export default function AssetAutocomplete({
           autoComplete="off"
         />
 
-        {loading && (
-          <small>Buscando ativos...</small>
-        )}
+        {loading && <small>Buscando ativos...</small>}
 
         {showSuggestions && suggestions.length > 0 && (
           <div className="autocomplete-list">

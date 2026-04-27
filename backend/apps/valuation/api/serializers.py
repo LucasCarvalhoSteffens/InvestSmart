@@ -38,15 +38,15 @@ class BarsiInputSerializer(BaseTickerSerializer):
         max_digits=8,
         decimal_places=6,
         required=False,
-        default="0.06",
-    )
-    dividends = serializers.ListField(
-        child=serializers.DecimalField(max_digits=12, decimal_places=4),
-        required=False,
-        allow_empty=False,
+        default="0.0600",
     )
     current_price = serializers.DecimalField(
         max_digits=12,
         decimal_places=2,
         required=False,
+    )
+    dividends = serializers.ListField(
+        child=serializers.DecimalField(max_digits=12, decimal_places=4),
+        required=False,
+        allow_empty=False,
     )
