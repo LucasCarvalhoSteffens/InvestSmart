@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from apps.assets.services.yahoo_finance import MarketDataUnavailable, sync_asset_from_yahoo
 from apps.assets.models import Asset
 from apps.portfolios.models import Portfolio, PortfolioItem, PortfolioItemAlert
 
@@ -31,6 +32,7 @@ class PortfolioItemAlertSerializer(serializers.ModelSerializer):
             "last_triggered_at",
             "created_at",
             "updated_at",
+            "ticker",
         ]
         read_only_fields = [
             "id",
@@ -62,6 +64,7 @@ class PortfolioItemAlertSerializer(serializers.ModelSerializer):
 
 
 class PortfolioItemSerializer(serializers.ModelSerializer):
+    ticker = serializers.CharField(write_only=True, required=False)
     asset_ticker = serializers.CharField(source="asset.ticker", read_only=True)
     asset_name = serializers.CharField(source="asset.name", read_only=True)
     current_price = serializers.DecimalField(
@@ -100,6 +103,7 @@ class PortfolioItemSerializer(serializers.ModelSerializer):
             "alerts",
             "created_at",
             "updated_at",
+            "ticker",
         ]
         read_only_fields = [
             "id",
@@ -148,7 +152,22 @@ class PortfolioItemSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         portfolio = attrs.get("portfolio", getattr(self.instance, "portfolio", None))
+        ticker = attrs.pop("ticker", None)
+
+        if ticker:
+            try:
+                market_data = sync_asset_from_yahoo(ticker)
+                attrs["asset"] = market_data.asset
+            except MarketDataUnavailable as exc:
+                raise serializers.ValidationError({"ticker": str(exc)}) from exc
+
         asset = attrs.get("asset", getattr(self.instance, "asset", None))
+
+        if asset is None:
+            raise serializers.ValidationError(
+                {"asset": "Informe um asset existente ou um ticker para buscar na API."}
+            )
+            
         quantity = attrs.get("quantity", getattr(self.instance, "quantity", None))
         average_price = attrs.get(
             "average_price",

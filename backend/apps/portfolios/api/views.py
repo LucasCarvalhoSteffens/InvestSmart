@@ -33,7 +33,7 @@ class PortfolioViewSet(ModelViewSet):
     @action(detail=True, methods=["get"], url_path="simulation")
     def simulation(self, request, pk=None):
         portfolio = self.get_object()
-        data = PortfolioSimulationService().simulate(portfolio)
+        data = PortfolioSimulationService(portfolio).simulate()
         return Response(data)
 
 

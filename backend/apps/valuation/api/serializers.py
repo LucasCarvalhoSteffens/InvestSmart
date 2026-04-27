@@ -1,24 +1,52 @@
 from rest_framework import serializers
-from apps.assets.models import Asset
 
 
-class GrahamInputSerializer(serializers.Serializer):
-    asset_id = serializers.PrimaryKeyRelatedField(queryset=Asset.objects.all(), source="asset")
-    lpa = serializers.DecimalField(max_digits=10, decimal_places=2)
-    vpa = serializers.DecimalField(max_digits=10, decimal_places=2)
+class BaseTickerSerializer(serializers.Serializer):
+    ticker = serializers.CharField(max_length=20)
+    force_refresh = serializers.BooleanField(required=False, default=False)
+    persist = serializers.BooleanField(required=False, default=False)
 
 
-class ProjectedInputSerializer(serializers.Serializer):
-    asset_id = serializers.PrimaryKeyRelatedField(queryset=Asset.objects.all(), source="asset")
-    dpa = serializers.DecimalField(max_digits=10, decimal_places=4)
-    average_dividend_yield = serializers.DecimalField(max_digits=5, decimal_places=4)
+class GrahamInputSerializer(BaseTickerSerializer):
+    lpa = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=4,
+        required=False,
+    )
+    vpa = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=4,
+        required=False,
+    )
 
 
-class BarsiInputSerializer(serializers.Serializer):
-    asset_id = serializers.PrimaryKeyRelatedField(queryset=Asset.objects.all(), source="asset")
-    current_price = serializers.DecimalField(max_digits=10, decimal_places=2)
-    target_yield = serializers.DecimalField(max_digits=5, decimal_places=4)
-    dividend_1 = serializers.DecimalField(max_digits=10, decimal_places=4, required=False, default=0)
-    dividend_2 = serializers.DecimalField(max_digits=10, decimal_places=4, required=False, default=0)
-    dividend_3 = serializers.DecimalField(max_digits=10, decimal_places=4, required=False, default=0)
-    dividend_4 = serializers.DecimalField(max_digits=10, decimal_places=4, required=False, default=0)
+class ProjectedInputSerializer(BaseTickerSerializer):
+    dpa = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=4,
+        required=False,
+    )
+    average_dividend_yield = serializers.DecimalField(
+        max_digits=8,
+        decimal_places=6,
+        required=False,
+    )
+
+
+class BarsiInputSerializer(BaseTickerSerializer):
+    target_yield = serializers.DecimalField(
+        max_digits=8,
+        decimal_places=6,
+        required=False,
+        default="0.06",
+    )
+    dividends = serializers.ListField(
+        child=serializers.DecimalField(max_digits=12, decimal_places=4),
+        required=False,
+        allow_empty=False,
+    )
+    current_price = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        required=False,
+    )
