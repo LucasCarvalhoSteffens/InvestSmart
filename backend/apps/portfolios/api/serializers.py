@@ -32,7 +32,6 @@ class PortfolioItemAlertSerializer(serializers.ModelSerializer):
             "last_triggered_at",
             "created_at",
             "updated_at",
-            "ticker",
         ]
         read_only_fields = [
             "id",
@@ -46,7 +45,9 @@ class PortfolioItemAlertSerializer(serializers.ModelSerializer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         request = self.context.get("request")
+
         if request and request.user.is_authenticated:
             self.fields["portfolio_item"].queryset = PortfolioItem.objects.filter(
                 portfolio__user=request.user
@@ -60,8 +61,8 @@ class PortfolioItemAlertSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "O preço de disparo deve ser maior que zero."
             )
-        return value
 
+        return value
 
 class PortfolioItemSerializer(serializers.ModelSerializer):
     ticker = serializers.CharField(write_only=True, required=False)
