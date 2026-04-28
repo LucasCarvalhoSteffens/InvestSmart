@@ -90,7 +90,7 @@ class PortfolioSimulationServiceTests(TestCase):
         )
 
     def test_should_simulate_portfolio_with_multiple_sources(self):
-        result = PortfolioSimulationService().simulate(self.portfolio)
+        result = PortfolioSimulationService(self.portfolio).simulate()
 
         self.assertEqual(result["summary"]["portfolio_id"], self.portfolio.id)
         self.assertEqual(result["summary"]["total_items"], 3)
@@ -144,7 +144,7 @@ class PortfolioSimulationServiceTests(TestCase):
             average_price=Decimal("13.00"),
         )
 
-        result = PortfolioSimulationService().simulate(self.portfolio)
+        result = PortfolioSimulationService(self.portfolio).simulate()
         abev3 = next(item for item in result["items"] if item["asset_ticker"] == "ABEV3")
 
         self.assertIsNone(abev3["price_ceiling"])

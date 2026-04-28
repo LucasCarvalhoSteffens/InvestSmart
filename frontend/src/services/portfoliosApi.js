@@ -111,3 +111,32 @@ export async function getPortfolioSimulation(portfolioId, access) {
   
     return data;
   }
+
+  export async function listPortfolioAlertEvents(filters = {}, access) {
+    const { data } = await http.get(
+      "/portfolios/alert-events/",
+      buildConfig(access, filters),
+    );
+  
+    return data;
+  }
+  
+  export async function checkPortfolioAlertEvents(payload = {}, access) {
+    const { data } = await http.post(
+      "/portfolios/alert-events/check/",
+      payload,
+      buildConfig(access),
+    );
+  
+    return data;
+  }
+  
+  export async function markPortfolioAlertEventAsRead(alertEventId, access) {
+    const { data } = await http.patch(
+      `/portfolios/alert-events/${alertEventId}/mark-as-read/`,
+      {},
+      buildConfig(access),
+    );
+  
+    return data;
+  }

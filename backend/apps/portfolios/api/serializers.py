@@ -1,7 +1,13 @@
 from rest_framework import serializers
 
+from apps.assets.services.yahoo_finance import MarketDataUnavailable, sync_asset_from_yahoo
 from apps.assets.models import Asset
-from apps.portfolios.models import Portfolio, PortfolioItem, PortfolioItemAlert
+from apps.portfolios.models import (
+    Portfolio,
+    PortfolioAlertEvent,
+    PortfolioItem,
+    PortfolioItemAlert,
+)
 
 
 class PortfolioItemAlertSerializer(serializers.ModelSerializer):
@@ -44,7 +50,9 @@ class PortfolioItemAlertSerializer(serializers.ModelSerializer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         request = self.context.get("request")
+
         if request and request.user.is_authenticated:
             self.fields["portfolio_item"].queryset = PortfolioItem.objects.filter(
                 portfolio__user=request.user
@@ -58,10 +66,11 @@ class PortfolioItemAlertSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "O preço de disparo deve ser maior que zero."
             )
+
         return value
 
-
 class PortfolioItemSerializer(serializers.ModelSerializer):
+    ticker = serializers.CharField(write_only=True, required=False)
     asset_ticker = serializers.CharField(source="asset.ticker", read_only=True)
     asset_name = serializers.CharField(source="asset.name", read_only=True)
     current_price = serializers.DecimalField(
@@ -100,6 +109,7 @@ class PortfolioItemSerializer(serializers.ModelSerializer):
             "alerts",
             "created_at",
             "updated_at",
+            "ticker",
         ]
         read_only_fields = [
             "id",
@@ -146,9 +156,38 @@ class PortfolioItemSerializer(serializers.ModelSerializer):
     def get_distance_to_target(self, obj):
         return obj.distance_to_target
 
-    def validate(self, attrs):
-        portfolio = attrs.get("portfolio", getattr(self.instance, "portfolio", None))
+    def _resolve_asset_from_ticker(self, attrs):
+        ticker = attrs.pop("ticker", None)
+
+        if not ticker:
+            return attrs
+
+        try:
+            market_data = sync_asset_from_yahoo(ticker)
+            attrs["asset"] = market_data.asset
+        except MarketDataUnavailable as exc:
+            raise serializers.ValidationError({"ticker": str(exc)}) from exc
+
+        return attrs
+
+
+    def _validate_required_asset(self, attrs):
         asset = attrs.get("asset", getattr(self.instance, "asset", None))
+
+        if asset is None:
+            raise serializers.ValidationError(
+                {"asset": "Informe um asset existente ou um ticker para buscar na API."}
+            )
+
+        return asset
+
+
+    def _validate_positive_value(self, field_name, value, message):
+        if value is not None and value <= 0:
+            raise serializers.ValidationError({field_name: message})
+
+
+    def _validate_positive_fields(self, attrs):
         quantity = attrs.get("quantity", getattr(self.instance, "quantity", None))
         average_price = attrs.get(
             "average_price",
@@ -159,30 +198,51 @@ class PortfolioItemSerializer(serializers.ModelSerializer):
             getattr(self.instance, "target_price", None),
         )
 
-        if quantity is not None and quantity <= 0:
+        self._validate_positive_value(
+            field_name="quantity",
+            value=quantity,
+            message="A quantidade deve ser maior que zero.",
+        )
+
+        self._validate_positive_value(
+            field_name="average_price",
+            value=average_price,
+            message="O preço médio deve ser maior que zero.",
+        )
+
+        self._validate_positive_value(
+            field_name="target_price",
+            value=target_price,
+            message="O preço teto deve ser maior que zero.",
+        )
+
+
+    def _validate_unique_asset_in_portfolio(self, portfolio, asset):
+        if not portfolio or not asset:
+            return
+
+        queryset = PortfolioItem.objects.filter(
+            portfolio=portfolio,
+            asset=asset,
+        )
+
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+
+        if queryset.exists():
             raise serializers.ValidationError(
-                {"quantity": "A quantidade deve ser maior que zero."}
+                {"asset": "Este ativo já existe nesta carteira."}
             )
 
-        if average_price is not None and average_price <= 0:
-            raise serializers.ValidationError(
-                {"average_price": "O preço médio deve ser maior que zero."}
-            )
 
-        if target_price is not None and target_price <= 0:
-            raise serializers.ValidationError(
-                {"target_price": "O preço teto deve ser maior que zero."}
-            )
+    def validate(self, attrs):
+        attrs = self._resolve_asset_from_ticker(attrs)
 
-        if portfolio and asset:
-            qs = PortfolioItem.objects.filter(portfolio=portfolio, asset=asset)
-            if self.instance:
-                qs = qs.exclude(pk=self.instance.pk)
+        portfolio = attrs.get("portfolio", getattr(self.instance, "portfolio", None))
+        asset = self._validate_required_asset(attrs)
 
-            if qs.exists():
-                raise serializers.ValidationError(
-                    {"asset": "Este ativo já existe nesta carteira."}
-                )
+        self._validate_positive_fields(attrs)
+        self._validate_unique_asset_in_portfolio(portfolio, asset)
 
         return attrs
 
@@ -257,3 +317,50 @@ class PortfolioSerializer(serializers.ModelSerializer):
                 )
 
         return attrs
+    
+class PortfolioAlertEventSerializer(serializers.ModelSerializer):
+    portfolio = serializers.IntegerField(source="portfolio_item.portfolio_id", read_only=True)
+    portfolio_name = serializers.CharField(
+        source="portfolio_item.portfolio.name",
+        read_only=True,
+    )
+    asset_ticker = serializers.CharField(
+        source="portfolio_item.asset.ticker",
+        read_only=True,
+    )
+    asset_name = serializers.CharField(
+        source="portfolio_item.asset.name",
+        read_only=True,
+    )
+
+    class Meta:
+        model = PortfolioAlertEvent
+        fields = [
+            "id",
+            "portfolio",
+            "portfolio_name",
+            "portfolio_item",
+            "asset_ticker",
+            "asset_name",
+            "event_type",
+            "current_price",
+            "price_ceiling",
+            "price_ceiling_source",
+            "message",
+            "is_read",
+            "created_at",
+        ]
+        read_only_fields = [
+            "id",
+            "portfolio",
+            "portfolio_name",
+            "portfolio_item",
+            "asset_ticker",
+            "asset_name",
+            "event_type",
+            "current_price",
+            "price_ceiling",
+            "price_ceiling_source",
+            "message",
+            "created_at",
+        ]

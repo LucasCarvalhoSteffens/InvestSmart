@@ -1,19 +1,30 @@
 import { useEffect, useState } from "react";
-import { listAssets } from "../services/assetsApi";
 import { useAuth } from "../contexts/AuthContext";
+import { listAssets } from "../services/assetsApi";
 
 export default function AssetSelect({ value, onChange }) {
   const { accessToken } = useAuth();
+
   const [assets, setAssets] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     async function loadAssets() {
+      if (!accessToken) {
+        setAssets([]);
+        return;
+      }
+
       try {
+        setLoading(true);
         setError("");
+
         const data = await listAssets(accessToken);
-        setAssets(data);
+
+        const results = Array.isArray(data) ? data : data.results || [];
+
+        setAssets(results);
       } catch {
         setError("Não foi possível carregar os ativos.");
       } finally {
@@ -21,30 +32,30 @@ export default function AssetSelect({ value, onChange }) {
       }
     }
 
-    if (accessToken) {
-      loadAssets();
-    }
+    loadAssets();
   }, [accessToken]);
-
-  if (loading) {
-    return <p className="muted">Carregando ativos...</p>;
-  }
-
-  if (error) {
-    return <p className="error-text">{error}</p>;
-  }
 
   return (
     <div className="form-group">
       <label>Ativo</label>
-      <select value={value} onChange={(e) => onChange(e.target.value)}>
-        <option value="">Selecione um ativo</option>
+
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        disabled={loading}
+      >
+        <option value="">
+          {loading ? "Carregando ativos..." : "Selecione um ativo"}
+        </option>
+
         {assets.map((asset) => (
           <option key={asset.id} value={asset.id}>
             {asset.ticker} - {asset.name}
           </option>
         ))}
       </select>
+
+      {error && <p className="error-text">{error}</p>}
     </div>
   );
 }

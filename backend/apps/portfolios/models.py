@@ -204,3 +204,43 @@ class PortfolioItemAlert(models.Model):
             return self.current_price >= self.threshold_price
 
         return False
+
+class PortfolioAlertEvent(models.Model):
+    class EventType(models.TextChoices):
+        BELOW_OR_EQUAL_CEILING = (
+            "below_or_equal_ceiling",
+            "Preço abaixo ou igual ao preço teto",
+        )
+        ABOVE_CEILING = (
+            "above_ceiling",
+            "Preço acima do preço teto",
+        )
+
+    portfolio_item = models.ForeignKey(
+        "portfolios.PortfolioItem",
+        on_delete=models.CASCADE,
+        related_name="alert_events",
+    )
+    event_type = models.CharField(
+        max_length=40,
+        choices=EventType.choices,
+    )
+    price_ceiling = models.DecimalField(max_digits=12, decimal_places=2)
+    current_price = models.DecimalField(max_digits=12, decimal_places=2)
+    price_ceiling_source = models.CharField(max_length=30, blank=True, default="")
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Evento de Alerta"
+        verbose_name_plural = "Eventos de Alerta"
+        db_table = "portfolios_portfolioalertevent"
+        indexes = [
+            models.Index(fields=["event_type", "created_at"]),
+            models.Index(fields=["is_read", "created_at"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.portfolio_item.asset.ticker} - {self.get_event_type_display()}"

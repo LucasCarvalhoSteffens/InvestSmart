@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from "react-router-dom";
+
 import { useAuth } from "../contexts/AuthContext";
 
 export default function Layout() {
@@ -13,8 +14,11 @@ export default function Layout() {
         </div>
 
         <div className="topbar-right">
-          <span className="user-badge">{user?.username}</span>
-          <button className="secondary-btn" onClick={signOut}>
+          {user?.username ? (
+            <span className="user-badge">{user.username}</span>
+          ) : null}
+
+          <button type="button" className="secondary-btn small-btn" onClick={signOut}>
             Sair
           </button>
         </div>
@@ -26,6 +30,7 @@ export default function Layout() {
         <NavLink to="/projetivo">Projetivo</NavLink>
         <NavLink to="/barsi">Barsi</NavLink>
         <NavLink to="/carteiras">Carteiras</NavLink>
+        <NavLink to="/alertas">Alertas</NavLink>
       </nav>
 
       <main>
