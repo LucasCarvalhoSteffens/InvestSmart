@@ -5,32 +5,37 @@ export default function HomePage() {
     <>
       <section className="hero">
         <h2>Calculadora Multimétodo e Carteiras</h2>
-        <p className="muted">
-          Escolha um dos métodos disponíveis ou acesse suas carteiras para
-          acompanhar posições e alertas.
+        <p>
+          Escolha um dos métodos disponíveis, acesse suas carteiras ou acompanhe
+          os alertas automáticos de preço teto.
         </p>
       </section>
 
       <section className="cards-grid">
-        <Link className="feature-card" to="/graham">
+        <Link to="/graham" className="feature-card">
           <h3>Método Graham</h3>
           <p>Calcule o preço justo com base em LPA e VPA.</p>
         </Link>
 
-        <Link className="feature-card" to="/projetivo">
+        <Link to="/projetivo" className="feature-card">
           <h3>Preço Teto Projetivo</h3>
           <p>Calcule o preço teto a partir de DPA e dividend yield médio.</p>
         </Link>
 
-        <Link className="feature-card" to="/barsi">
+        <Link to="/barsi" className="feature-card">
           <h3>Método Barsi</h3>
           <p>Analise o preço teto com base em dividendos e yield alvo.</p>
         </Link>
 
-        <Link className="feature-card" to="/carteiras">
+        <Link to="/carteiras" className="feature-card">
           <h3>Carteiras</h3>
+          <p>Cadastre carteiras, adicione ativos e configure alertas por preço.</p>
+        </Link>
+
+        <Link to="/alertas" className="feature-card">
+          <h3>Alertas automáticos</h3>
           <p>
-            Cadastre carteiras, adicione ativos e configure alertas por preço.
+            Visualize eventos gerados pela rotina de preço atual contra preço teto.
           </p>
         </Link>
       </section>

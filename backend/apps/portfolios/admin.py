@@ -1,6 +1,11 @@
 from django.contrib import admin
 
-from apps.portfolios.models import Portfolio, PortfolioItem, PortfolioItemAlert
+from apps.portfolios.models import (
+    Portfolio,
+    PortfolioAlertEvent,
+    PortfolioItem,
+    PortfolioItemAlert,
+)
 
 
 @admin.register(Portfolio)
@@ -46,3 +51,23 @@ class PortfolioItemAlertAdmin(admin.ModelAdmin):
         "portfolio_item__asset__ticker",
     )
     list_filter = ("alert_type", "is_active", "created_at")
+    
+@admin.register(PortfolioAlertEvent)
+class PortfolioAlertEventAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "portfolio_item",
+        "event_type",
+        "current_price",
+        "price_ceiling",
+        "price_ceiling_source",
+        "is_read",
+        "created_at",
+    )
+    search_fields = (
+        "portfolio_item__portfolio__name",
+        "portfolio_item__portfolio__user__username",
+        "portfolio_item__asset__ticker",
+        "message",
+    )
+    list_filter = ("event_type", "is_read", "price_ceiling_source", "created_at")

@@ -23,7 +23,12 @@ def percentage(part: Decimal, total: Decimal) -> Decimal:
 
 
 class PortfolioSimulationService:
-    def simulate(self, portfolio):
+    def __init__(self, portfolio):
+        self.portfolio = portfolio
+
+    def simulate(self):
+        portfolio = self.portfolio
+
         items = list(
             portfolio.items.select_related("asset").all()
         )
