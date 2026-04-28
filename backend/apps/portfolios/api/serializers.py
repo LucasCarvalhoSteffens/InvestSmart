@@ -2,7 +2,12 @@ from rest_framework import serializers
 
 from apps.assets.services.yahoo_finance import MarketDataUnavailable, sync_asset_from_yahoo
 from apps.assets.models import Asset
-from apps.portfolios.models import Portfolio, PortfolioItem, PortfolioItemAlert
+from apps.portfolios.models import (
+    Portfolio,
+    PortfolioAlertEvent,
+    PortfolioItem,
+    PortfolioItemAlert,
+)
 
 
 class PortfolioItemAlertSerializer(serializers.ModelSerializer):
@@ -312,3 +317,50 @@ class PortfolioSerializer(serializers.ModelSerializer):
                 )
 
         return attrs
+    
+class PortfolioAlertEventSerializer(serializers.ModelSerializer):
+    portfolio = serializers.IntegerField(source="portfolio_item.portfolio_id", read_only=True)
+    portfolio_name = serializers.CharField(
+        source="portfolio_item.portfolio.name",
+        read_only=True,
+    )
+    asset_ticker = serializers.CharField(
+        source="portfolio_item.asset.ticker",
+        read_only=True,
+    )
+    asset_name = serializers.CharField(
+        source="portfolio_item.asset.name",
+        read_only=True,
+    )
+
+    class Meta:
+        model = PortfolioAlertEvent
+        fields = [
+            "id",
+            "portfolio",
+            "portfolio_name",
+            "portfolio_item",
+            "asset_ticker",
+            "asset_name",
+            "event_type",
+            "current_price",
+            "price_ceiling",
+            "price_ceiling_source",
+            "message",
+            "is_read",
+            "created_at",
+        ]
+        read_only_fields = [
+            "id",
+            "portfolio",
+            "portfolio_name",
+            "portfolio_item",
+            "asset_ticker",
+            "asset_name",
+            "event_type",
+            "current_price",
+            "price_ceiling",
+            "price_ceiling_source",
+            "message",
+            "created_at",
+        ]

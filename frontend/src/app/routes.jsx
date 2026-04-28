@@ -1,6 +1,8 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+
 import Layout from "../components/Layout";
 import ProtectedRoute from "../components/ProtectedRoute";
+import AlertEventsPage from "../pages/AlertEventsPage";
 import BarsiPage from "../pages/BarsiPage";
 import GrahamPage from "../pages/GrahamPage";
 import HomePage from "../pages/HomePage";
@@ -15,18 +17,18 @@ export default function AppRoutes() {
         <Route path="/login" element={<LoginPage />} />
 
         <Route
-          path="/"
           element={
             <ProtectedRoute>
               <Layout />
             </ProtectedRoute>
           }
         >
-          <Route index element={<HomePage />} />
-          <Route path="graham" element={<GrahamPage />} />
-          <Route path="projetivo" element={<ProjectedPage />} />
-          <Route path="barsi" element={<BarsiPage />} />
-          <Route path="carteiras" element={<PortfoliosPage />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/graham" element={<GrahamPage />} />
+          <Route path="/projetivo" element={<ProjectedPage />} />
+          <Route path="/barsi" element={<BarsiPage />} />
+          <Route path="/carteiras" element={<PortfoliosPage />} />
+          <Route path="/alertas" element={<AlertEventsPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
