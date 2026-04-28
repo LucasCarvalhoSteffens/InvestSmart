@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../contexts/AuthContext";
 
@@ -25,12 +25,13 @@ export default function Layout() {
       </header>
 
       <nav className="nav-links">
-        <NavLink to="/">Início</NavLink>
-        <NavLink to="/graham">Graham</NavLink>
-        <NavLink to="/projetivo">Projetivo</NavLink>
-        <NavLink to="/barsi">Barsi</NavLink>
-        <NavLink to="/carteiras">Carteiras</NavLink>
-        <NavLink to="/alertas">Alertas</NavLink>
+        <Link to="/">Início</Link>
+        <Link to="/dashboard">Dashboard</Link>
+        <Link to="/portfolios">Carteiras</Link>
+        <Link to="/alerts">Alertas</Link>
+        <Link to="/graham">Graham</Link>
+        <Link to="/projected">Projetivo</Link>
+        <Link to="/barsi">Barsi</Link>
       </nav>
 
       <main>
