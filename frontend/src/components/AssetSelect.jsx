@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { listAssets } from "../services/assetsApi";
@@ -37,13 +39,14 @@ export default function AssetSelect({ value, onChange }) {
 
   return (
     <div className="form-group">
-      <label>Ativo</label>
+      <label htmlFor="asset-select">Ativo</label>
 
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        disabled={loading}
-      >
+        <select
+          id="asset-select"
+          value={value}
+          onChange={onChange}
+          disabled={loading}
+        >
         <option value="">
           {loading ? "Carregando ativos..." : "Selecione um ativo"}
         </option>
@@ -59,3 +62,8 @@ export default function AssetSelect({ value, onChange }) {
     </div>
   );
 }
+
+AssetSelect.propTypes = {
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  onChange: PropTypes.func.isRequired,
+};

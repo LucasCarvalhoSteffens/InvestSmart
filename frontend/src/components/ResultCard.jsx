@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 export default function ResultCard({ title, result }) {
     if (!result) return null;
   
@@ -16,3 +18,8 @@ export default function ResultCard({ title, result }) {
       </div>
     );
   }
+
+  ResultCard.propTypes = {
+    title: PropTypes.string.isRequired,
+    result: PropTypes.object,
+  };

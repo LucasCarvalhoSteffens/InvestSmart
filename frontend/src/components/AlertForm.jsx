@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 export default function AlertForm({
     form,
     onChange,
@@ -51,3 +53,15 @@ export default function AlertForm({
       </form>
     );
   }
+
+  AlertForm.propTypes = {
+    form: PropTypes.shape({
+      formKey: PropTypes.string,
+      alert_type: PropTypes.string,
+      threshold_price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    }).isRequired,
+    onChange: PropTypes.func.isRequired,
+    onSubmit: PropTypes.func.isRequired,
+    onCancel: PropTypes.func,
+    submitting: PropTypes.bool,
+  };

@@ -1,15 +1,30 @@
+import PropTypes from "prop-types";
 import AssetAutocomplete from "./AssetAutocomplete";
 
+function getSubmitButtonLabel(submitting, editing) {
+  if (submitting) {
+    return "Salvando...";
+  }
+
+  if (editing) {
+    return "Atualizar ativo";
+  }
+
+  return "Adicionar ativo";
+}
+
 export default function PortfolioItemForm({
-  portfolioSelected,
+  portfolioSelected = false,
   form,
   onTextChange,
   onAssetChange,
   onSubmit,
   onCancel,
-  submitting,
-  editing,
+  submitting = false,
+  editing = false,
 }) {
+  const submitButtonLabel = getSubmitButtonLabel(submitting, editing);
+
   return (
     <div className="card portfolio-form-card portfolio-item-form-compact">
       <div className="form-header compact">
@@ -30,12 +45,7 @@ export default function PortfolioItemForm({
         {editing && <span className="status-pill status-idle">Edição</span>}
       </div>
 
-      {!portfolioSelected ? (
-        <div className="empty-state compact">
-          <strong>Nenhuma carteira selecionada</strong>
-          <span>Selecione ou crie uma carteira antes de adicionar ativos.</span>
-        </div>
-      ) : (
+      {portfolioSelected ? (
         <form className="form friendly-form compact" onSubmit={onSubmit}>
           <AssetAutocomplete
             value={form.ticker}
@@ -104,11 +114,7 @@ export default function PortfolioItemForm({
 
           <div className="button-row form-actions compact">
             <button className="primary-btn" type="submit" disabled={submitting}>
-              {submitting
-                ? "Salvando..."
-                : editing
-                  ? "Atualizar ativo"
-                  : "Adicionar ativo"}
+              {submitButtonLabel}
             </button>
 
             {editing && (
@@ -123,7 +129,29 @@ export default function PortfolioItemForm({
             )}
           </div>
         </form>
+      ) : (
+        <div className="empty-state compact">
+          <strong>Nenhuma carteira selecionada</strong>
+          <span>Selecione ou crie uma carteira antes de adicionar ativos.</span>
+        </div>
       )}
     </div>
   );
 }
+
+PortfolioItemForm.propTypes = {
+  portfolioSelected: PropTypes.bool,
+  form: PropTypes.shape({
+    ticker: PropTypes.string,
+    quantity: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    average_price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    target_price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    notes: PropTypes.string,
+  }).isRequired,
+  onTextChange: PropTypes.func.isRequired,
+  onAssetChange: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  onCancel: PropTypes.func,
+  submitting: PropTypes.bool,
+  editing: PropTypes.bool,
+};

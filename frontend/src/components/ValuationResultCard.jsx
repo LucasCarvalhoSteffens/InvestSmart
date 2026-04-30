@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 const LABELS = {
     ticker: "Ticker",
     asset_ticker: "Ticker",
@@ -35,7 +37,7 @@ const LABELS = {
   ]);
   
   function formatLabel(key) {
-    return LABELS[key] || key.replaceAll("_", " ").replace(/\b\w/g, (char) => char.toUpperCase());
+    return LABELS[key] || key.replaceAll("_", " ").replaceAll(/\b\w/g, (char) => char.toUpperCase());
   }
   
   function isNumeric(value) {
@@ -185,3 +187,12 @@ const LABELS = {
       </article>
     );
   }
+
+  ValuationResultCard.propTypes = {
+    result: PropTypes.object,
+    title: PropTypes.string.isRequired,
+    subtitle: PropTypes.string,
+    primaryLabel: PropTypes.string,
+    primaryKeys: PropTypes.arrayOf(PropTypes.string),
+    accent: PropTypes.string,
+  };
