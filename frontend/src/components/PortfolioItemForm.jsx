@@ -11,14 +11,19 @@ export default function PortfolioItemForm({
   editing,
 }) {
   return (
-    <div className="card portfolio-form-card">
-      <div className="form-header">
+    <div className="card portfolio-form-card portfolio-item-form-compact">
+      <div className="form-header compact">
         <div>
+          <span className="portfolio-item-form-kicker">
+            {editing ? "Editando ativo" : "Novo ativo"}
+          </span>
+
           <h3 className="section-title">
-            {editing ? "Editar ativo da carteira" : "Adicionar ativo"}
+            {editing ? "Editar ativo" : "Adicionar ativo"}
           </h3>
+
           <p className="muted">
-            Pesquise um ativo, informe sua posição e defina um preço teto para acompanhamento.
+            Informe o ativo, quantidade, preço médio e preço teto.
           </p>
         </div>
 
@@ -31,7 +36,7 @@ export default function PortfolioItemForm({
           <span>Selecione ou crie uma carteira antes de adicionar ativos.</span>
         </div>
       ) : (
-        <form className="form friendly-form" onSubmit={onSubmit}>
+        <form className="form friendly-form compact" onSubmit={onSubmit}>
           <AssetAutocomplete
             value={form.ticker}
             onChange={onAssetChange}
@@ -40,7 +45,7 @@ export default function PortfolioItemForm({
             disabled={submitting}
           />
 
-          <div className="form-grid two-columns">
+          <div className="form-grid portfolio-item-grid-compact">
             <div className="form-group">
               <label htmlFor="quantity">Quantidade</label>
               <input
@@ -53,7 +58,6 @@ export default function PortfolioItemForm({
                 placeholder="Ex.: 10"
                 required
               />
-              <small className="field-hint">Quantidade de ações na posição.</small>
             </div>
 
             <div className="form-group">
@@ -69,7 +73,6 @@ export default function PortfolioItemForm({
                 placeholder="Ex.: 24.50"
                 required
               />
-              <small className="field-hint">Valor médio pago por ação.</small>
             </div>
 
             <div className="form-group">
@@ -82,32 +85,30 @@ export default function PortfolioItemForm({
                 onChange={onTextChange}
                 min="0.01"
                 step="0.01"
-                placeholder="Ex.: 30.00"
+                placeholder="Opcional"
               />
-              <small className="field-hint">
-                Opcional. Usado para alertas e análise de oportunidade.
-              </small>
             </div>
 
             <div className="form-group">
               <label htmlFor="notes">Observações</label>
-              <textarea
+              <input
                 id="notes"
+                type="text"
                 name="notes"
                 value={form.notes}
                 onChange={onTextChange}
-                placeholder="Ex.: posição de longo prazo, foco em dividendos..."
+                placeholder="Ex.: longo prazo, dividendos..."
               />
             </div>
           </div>
 
-          <div className="button-row form-actions">
+          <div className="button-row form-actions compact">
             <button className="primary-btn" type="submit" disabled={submitting}>
               {submitting
                 ? "Salvando..."
                 : editing
                   ? "Atualizar ativo"
-                  : "Adicionar à carteira"}
+                  : "Adicionar ativo"}
             </button>
 
             {editing && (
@@ -117,7 +118,7 @@ export default function PortfolioItemForm({
                 onClick={onCancel}
                 disabled={submitting}
               >
-                Cancelar edição
+                Cancelar
               </button>
             )}
           </div>

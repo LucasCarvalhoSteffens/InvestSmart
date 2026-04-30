@@ -10,6 +10,12 @@ const navigationGroups = [
         label: "Início",
         description: "Resumo da plataforma",
       },
+      {
+        to: "/dashboard",
+        icon: "📊",
+        label: "Dashboard",
+        description: "Indicadores e gráficos",
+      },
     ],
   },
   {
@@ -36,14 +42,25 @@ const navigationGroups = [
     ],
   },
   {
-    title: "Gestão",
+    title: "Carteiras",
     items: [
       {
         to: "/portfolios",
         icon: "💼",
-        label: "Carteiras",
-        description: "Ativos, simulação e preço teto",
+        label: "Minhas Carteiras",
+        description: "Acompanhe ativos reais",
       },
+      {
+        to: "/simulator",
+        icon: "🧪",
+        label: "Simulador",
+        description: "Teste cenários hipotéticos",
+      },
+    ],
+  },
+  {
+    title: "Monitoramento",
+    items: [
       {
         to: "/alerts",
         icon: "🔔",
@@ -76,12 +93,12 @@ export default function Sidebar({ open, user, onClose, onSignOut }) {
         </div>
 
         <button
-            type="button"
-            className="sidebar-close-btn"
-            onClick={onClose}
-            aria-label="Fechar menu lateral"
-            >
-            ×
+          type="button"
+          className="sidebar-close-btn"
+          onClick={onClose}
+          aria-label="Fechar menu lateral"
+        >
+          ×
         </button>
       </div>
 
@@ -125,7 +142,9 @@ export default function Sidebar({ open, user, onClose, onSignOut }) {
       <div className="sidebar-footer">
         <div className="sidebar-footer-card">
           <strong>MVP em evolução</strong>
-          <small>Calculadoras, carteiras, alertas e dashboards integrados.</small>
+          <small>
+            Calculadoras, carteiras reais, simulador, alertas e dashboards.
+          </small>
         </div>
 
         <button type="button" className="sidebar-logout-btn" onClick={onSignOut}>

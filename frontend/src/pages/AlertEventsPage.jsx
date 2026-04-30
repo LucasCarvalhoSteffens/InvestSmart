@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-
+import { useEffect, useMemo, useState } from "react";
 import AlertEventCard from "../components/AlertEventCard";
 import { useAuth } from "../contexts/AuthContext";
 import {
@@ -50,15 +49,46 @@ function normalizeList(data) {
   return [];
 }
 
+function getStats(alerts) {
+  return alerts.reduce(
+    (acc, alert) => {
+      acc.total += 1;
+
+      if (!alert.is_read) {
+        acc.unread += 1;
+      }
+
+      if (alert.event_type === "below_or_equal_ceiling") {
+        acc.insideCeiling += 1;
+      }
+
+      if (alert.event_type === "above_ceiling") {
+        acc.aboveCeiling += 1;
+      }
+
+      return acc;
+    },
+    {
+      total: 0,
+      unread: 0,
+      insideCeiling: 0,
+      aboveCeiling: 0,
+    },
+  );
+}
+
 export default function AlertEventsPage() {
   const { accessToken } = useAuth();
 
   const [alerts, setAlerts] = useState([]);
   const [portfolios, setPortfolios] = useState([]);
+
   const [selectedPortfolioId, setSelectedPortfolioId] = useState("");
   const [onlyUnread, setOnlyUnread] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const [loading, setLoading] = useState(true);
+  const [loadingPortfolios, setLoadingPortfolios] = useState(false);
+  const [loadingAlerts, setLoadingAlerts] = useState(false);
   const [checking, setChecking] = useState(false);
   const [markingAsReadId, setMarkingAsReadId] = useState(null);
 
@@ -66,83 +96,123 @@ export default function AlertEventsPage() {
   const [successMessage, setSuccessMessage] = useState("");
   const [checkSummary, setCheckSummary] = useState(null);
 
-  const unreadCount = useMemo(
-    () => alerts.filter((alert) => !alert.is_read).length,
-    [alerts],
-  );
+  const filteredAlerts = useMemo(() => {
+    const search = searchTerm.trim().toLowerCase();
 
-  const filters = useMemo(() => {
-    const params = {};
-
-    if (selectedPortfolioId) {
-      params.portfolio_id = selectedPortfolioId;
+    if (!search) {
+      return alerts;
     }
 
-    if (onlyUnread) {
-      params.is_read = "false";
-    }
+    return alerts.filter((alert) => {
+      const content = [
+        alert.asset_ticker,
+        alert.asset_name,
+        alert.portfolio_name,
+        alert.message,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
 
-    return params;
-  }, [selectedPortfolioId, onlyUnread]);
+      return content.includes(search);
+    });
+  }, [alerts, searchTerm]);
 
-  const loadPortfolios = useCallback(async () => {
-    if (!accessToken) {
-      return;
-    }
+  const stats = useMemo(() => getStats(alerts), [alerts]);
 
-    const data = await listPortfolios(accessToken);
-    setPortfolios(normalizeList(data));
-  }, [accessToken]);
-
-  const loadAlerts = useCallback(async () => {
-    if (!accessToken) {
+  async function fetchPortfolios(currentAccessToken, shouldUpdate = true) {
+    if (!currentAccessToken) {
       return;
     }
 
     try {
-      setLoading(true);
+      setLoadingPortfolios(true);
       setPageError("");
 
-      const data = await listPortfolioAlertEvents(filters, accessToken);
-      setAlerts(normalizeList(data));
+      const data = await listPortfolios(currentAccessToken);
+
+      if (shouldUpdate) {
+        setPortfolios(normalizeList(data));
+      }
     } catch (error) {
-      setPageError(
-        extractErrorMessage(
-          error,
-          "Não foi possível carregar os alertas automáticos.",
-        ),
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [accessToken, filters]);
-
-  useEffect(() => {
-    async function loadInitialData() {
-      try {
-        setLoading(true);
-        setPageError("");
-
-        await Promise.all([
-          loadPortfolios(),
-          loadAlerts(),
-        ]);
-      } catch (error) {
+      if (shouldUpdate) {
         setPageError(
-          extractErrorMessage(
-            error,
-            "Não foi possível carregar os dados da tela de alertas.",
-          ),
+          extractErrorMessage(error, "Não foi possível carregar as carteiras."),
         );
-      } finally {
-        setLoading(false);
+      }
+    } finally {
+      if (shouldUpdate) {
+        setLoadingPortfolios(false);
       }
     }
+  }
 
-    loadInitialData();
-  }, [loadPortfolios, loadAlerts]);
+  async function fetchAlerts(currentAccessToken, shouldUpdate = true) {
+    if (!currentAccessToken) {
+      return;
+    }
+
+    try {
+      setLoadingAlerts(true);
+      setPageError("");
+
+      const params = {};
+
+      if (selectedPortfolioId) {
+        params.portfolio_id = selectedPortfolioId;
+      }
+
+      if (onlyUnread) {
+        params.is_read = "false";
+      }
+
+      const data = await listPortfolioAlertEvents(params, currentAccessToken);
+
+      if (shouldUpdate) {
+        setAlerts(normalizeList(data));
+      }
+    } catch (error) {
+      if (shouldUpdate) {
+        setPageError(
+          extractErrorMessage(error, "Não foi possível carregar os alertas."),
+        );
+      }
+    } finally {
+      if (shouldUpdate) {
+        setLoadingAlerts(false);
+      }
+    }
+  }
+
+  useEffect(() => {
+    let shouldUpdate = true;
+
+    fetchPortfolios(accessToken, shouldUpdate);
+
+    return () => {
+      shouldUpdate = false;
+    };
+  }, [accessToken]);
+
+  useEffect(() => {
+    let shouldUpdate = true;
+
+    fetchAlerts(accessToken, shouldUpdate);
+
+    return () => {
+      shouldUpdate = false;
+    };
+  }, [accessToken, selectedPortfolioId, onlyUnread]);
+
+  async function handleRefreshAlerts() {
+    await fetchAlerts(accessToken, true);
+  }
 
   async function handleCheckAlerts() {
+    if (!accessToken) {
+      return;
+    }
+
     try {
       setChecking(true);
       setPageError("");
@@ -161,9 +231,9 @@ export default function AlertEventsPage() {
       const summary = await checkPortfolioAlertEvents(payload, accessToken);
 
       setCheckSummary(summary);
-      setSuccessMessage("Verificação de alertas executada com sucesso.");
+      setSuccessMessage("Verificação executada com sucesso.");
 
-      await loadAlerts();
+      await fetchAlerts(accessToken, true);
     } catch (error) {
       setPageError(
         extractErrorMessage(
@@ -177,6 +247,10 @@ export default function AlertEventsPage() {
   }
 
   async function handleMarkAsRead(alertEventId) {
+    if (!accessToken) {
+      return;
+    }
+
     try {
       setMarkingAsReadId(alertEventId);
       setPageError("");
@@ -186,19 +260,14 @@ export default function AlertEventsPage() {
 
       setAlerts((previousAlerts) =>
         previousAlerts.map((alert) =>
-          alert.id === alertEventId
-            ? { ...alert, is_read: true }
-            : alert,
+          alert.id === alertEventId ? { ...alert, is_read: true } : alert,
         ),
       );
 
       setSuccessMessage("Alerta marcado como lido.");
     } catch (error) {
       setPageError(
-        extractErrorMessage(
-          error,
-          "Não foi possível marcar o alerta como lido.",
-        ),
+        extractErrorMessage(error, "Não foi possível marcar o alerta como lido."),
       );
     } finally {
       setMarkingAsReadId(null);
@@ -206,22 +275,25 @@ export default function AlertEventsPage() {
   }
 
   return (
-    <section className="stack">
-      <div className="page-header compact">
+    <div className="alerts-v2-page">
+      <section className="alerts-v2-hero">
         <div>
-          <h2>Alertas automáticos</h2>
-          <p className="muted">
-            Acompanhe os alertas gerados pela rotina de verificação de preço atual
-            contra preço teto.
+          <span className="alerts-v2-kicker">Monitoramento automático</span>
+
+          <h2>Alertas de preço teto</h2>
+
+          <p>
+            Acompanhe oportunidades e avisos gerados quando o preço atual dos
+            ativos cruza os limites definidos nas suas carteiras.
           </p>
         </div>
 
-        <div className="button-row wrap">
+        <div className="alerts-v2-actions">
           <button
             type="button"
             className="secondary-btn"
-            onClick={loadAlerts}
-            disabled={loading || checking}
+            onClick={handleRefreshAlerts}
+            disabled={loadingAlerts || checking}
           >
             Atualizar lista
           </button>
@@ -235,52 +307,81 @@ export default function AlertEventsPage() {
             {checking ? "Verificando..." : "Verificar agora"}
           </button>
         </div>
-      </div>
+      </section>
 
-      {pageError ? (
-        <p className="error-text">{pageError}</p>
-      ) : null}
+      {pageError && <div className="error-message">{pageError}</div>}
+      {successMessage && <div className="success-message">{successMessage}</div>}
 
-      {successMessage ? (
-        <p className="success-text">{successMessage}</p>
-      ) : null}
+      <section className="alerts-v2-stats-grid">
+        <div className="alerts-v2-stat total">
+          <span>Total</span>
+          <strong>{stats.total}</strong>
+        </div>
 
-      {checkSummary ? (
-        <div className="card soft-card">
-          <h3 className="section-title">Resumo da última verificação</h3>
+        <div className="alerts-v2-stat unread">
+          <span>Não lidos</span>
+          <strong>{stats.unread}</strong>
+        </div>
 
-          <div className="summary-grid">
-            <div className="summary-stat">
-              <span className="summary-label">Itens verificados</span>
-              <strong>{checkSummary.checked_items}</strong>
+        <div className="alerts-v2-stat success">
+          <span>Dentro do teto</span>
+          <strong>{stats.insideCeiling}</strong>
+        </div>
+
+        <div className="alerts-v2-stat warning">
+          <span>Acima do teto</span>
+          <strong>{stats.aboveCeiling}</strong>
+        </div>
+      </section>
+
+      {checkSummary && (
+        <section className="alerts-v2-check-summary">
+          <div>
+            <span>Última verificação</span>
+            <strong>Rotina executada</strong>
+          </div>
+
+          <div className="alerts-v2-check-grid">
+            <div>
+              <span>Verificados</span>
+              <strong>{checkSummary.checked_items ?? 0}</strong>
             </div>
 
-            <div className="summary-stat">
-              <span className="summary-label">Alertas gerados</span>
-              <strong>{checkSummary.created_events}</strong>
+            <div>
+              <span>Gerados</span>
+              <strong>{checkSummary.created_events ?? 0}</strong>
             </div>
 
-            <div className="summary-stat">
-              <span className="summary-label">Itens ignorados</span>
-              <strong>{checkSummary.skipped_items}</strong>
+            <div>
+              <span>Ignorados</span>
+              <strong>{checkSummary.skipped_items ?? 0}</strong>
             </div>
 
-            <div className="summary-stat">
-              <span className="summary-label">Falhas na atualização</span>
-              <strong>{checkSummary.failed_updates}</strong>
+            <div>
+              <span>Falhas</span>
+              <strong>{checkSummary.failed_updates ?? 0}</strong>
             </div>
           </div>
-        </div>
-      ) : null}
+        </section>
+      )}
 
-      <div className="card">
-        <div className="alert-filters">
-          <div className="form-group">
-            <label htmlFor="portfolio-filter">Filtrar por carteira</label>
+      <section className="alerts-v2-filter-card">
+        <div className="alerts-v2-filter-header">
+          <div>
+            <span>Filtros</span>
+            <strong>Refine a listagem</strong>
+          </div>
+
+          <small>{filteredAlerts.length} alerta(s) encontrado(s)</small>
+        </div>
+
+        <div className="alerts-v2-filter-grid">
+          <label>
+            Carteira
             <select
-              id="portfolio-filter"
               value={selectedPortfolioId}
               onChange={(event) => setSelectedPortfolioId(event.target.value)}
+              disabled={loadingPortfolios}
             >
               <option value="">Todas as carteiras</option>
 
@@ -290,49 +391,61 @@ export default function AlertEventsPage() {
                 </option>
               ))}
             </select>
-          </div>
+          </label>
 
-          <label className="checkbox-row">
+          <label>
+            Buscar
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="PETR4, carteira, mensagem..."
+            />
+          </label>
+
+          <label className="alerts-v2-checkbox">
             <input
               type="checkbox"
               checked={onlyUnread}
               onChange={(event) => setOnlyUnread(event.target.checked)}
             />
 
-            Exibir somente não lidos
+            <span>Somente não lidos</span>
           </label>
+        </div>
+      </section>
 
-          <div className="alert-count-card">
-            <span className="summary-label">Não lidos nesta listagem</span>
-            <strong>{unreadCount}</strong>
+      <section className="alerts-v2-list-card">
+        <div className="alerts-v2-list-header">
+          <div>
+            <span>Eventos</span>
+            <h3>Histórico de alertas</h3>
           </div>
         </div>
-      </div>
 
-      {loading ? (
-        <div className="card">
-          <p className="muted">Carregando alertas...</p>
-        </div>
-      ) : alerts.length === 0 ? (
-        <div className="card">
-          <h3>Nenhum alerta encontrado</h3>
-          <p className="muted">
-            Quando a rotina periódica identificar ativos acima ou abaixo do preço
-            teto, os alertas aparecerão aqui.
-          </p>
-        </div>
-      ) : (
-        <div className="alert-events-list">
-          {alerts.map((alert) => (
-            <AlertEventCard
-              key={alert.id}
-              alert={alert}
-              onMarkAsRead={handleMarkAsRead}
-              markingAsRead={markingAsReadId === alert.id}
-            />
-          ))}
-        </div>
-      )}
-    </section>
+        {loadingAlerts ? (
+          <div className="loading-card">Carregando alertas...</div>
+        ) : filteredAlerts.length === 0 ? (
+          <div className="empty-state">
+            <strong>Nenhum alerta encontrado</strong>
+            <span>
+              Quando a rotina identificar ativos acima ou abaixo do preço teto,
+              os alertas aparecerão aqui.
+            </span>
+          </div>
+        ) : (
+          <div className="alerts-v2-grid">
+            {filteredAlerts.map((alert) => (
+              <AlertEventCard
+                key={alert.id}
+                alert={alert}
+                onMarkAsRead={handleMarkAsRead}
+                markingAsRead={markingAsReadId === alert.id}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
   );
 }

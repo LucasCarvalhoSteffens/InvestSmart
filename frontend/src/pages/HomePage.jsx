@@ -48,15 +48,15 @@ const workflowSteps = [
   },
   {
     number: "03",
-    title: "Monte sua carteira",
+    title: "Simule cenários",
     description:
-      "Cadastre posições, preço médio e preço teto para acompanhar oportunidades.",
+      "Teste carteiras hipotéticas antes de transformar o cenário em acompanhamento real.",
   },
   {
     number: "04",
-    title: "Acompanhe alertas",
+    title: "Acompanhe sua carteira",
     description:
-      "Visualize eventos quando o preço atual se aproxima dos limites definidos.",
+      "Monitore posições reais, preço médio, preço teto, rentabilidade e alertas.",
   },
 ];
 
@@ -84,24 +84,28 @@ export default function HomePage() {
     <div className="home-page">
       <section className="home-hero">
         <div className="home-hero-content">
-          <span className="home-kicker">Plataforma Web de Análise Fundamentalista</span>
+          <span className="home-kicker">
+            Plataforma Web de Análise Fundamentalista
+          </span>
 
           <h1>
-            Analise ações, calcule preço justo e acompanhe suas carteiras em um só lugar.
+            Analise ações, simule cenários e acompanhe suas carteiras reais em
+            um só lugar.
           </h1>
 
           <p>
-            O InvestSmart reúne métodos clássicos de valuation, simulação de carteiras
-            e alertas por preço teto para apoiar decisões de investimento de longo prazo.
+            O InvestSmart reúne métodos clássicos de valuation, simulação de
+            carteiras, acompanhamento patrimonial e alertas por preço teto para
+            apoiar decisões de investimento de longo prazo.
           </p>
 
           <div className="home-actions">
             <Link className="primary-btn home-primary-action" to="/portfolios">
-              Abrir carteiras
+              Minhas carteiras
             </Link>
 
-            <Link className="secondary-btn home-secondary-action" to="/graham">
-              Começar por Graham
+            <Link className="secondary-btn home-secondary-action" to="/simulator">
+              Abrir simulador
             </Link>
           </div>
         </div>
@@ -114,23 +118,23 @@ export default function HomePage() {
 
           <div className="home-panel-metric highlight">
             <span>Funcionalidade central</span>
-            <strong>Calculadora multimétodo</strong>
+            <strong>Carteiras + Simulação + Valuation</strong>
           </div>
 
           <div className="home-panel-list">
             <div>
-              <span>Graham</span>
-              <strong>LPA + VPA</strong>
+              <span>Carteiras</span>
+              <strong>Posições reais</strong>
             </div>
 
             <div>
-              <span>Barsi</span>
-              <strong>Dividendos</strong>
+              <span>Simulador</span>
+              <strong>Cenários hipotéticos</strong>
             </div>
 
             <div>
-              <span>Projetivo</span>
-              <strong>Preço teto</strong>
+              <span>Valuation</span>
+              <strong>Graham, Barsi e Projetivo</strong>
             </div>
           </div>
         </div>
@@ -153,8 +157,8 @@ export default function HomePage() {
           </div>
 
           <p>
-            Use os três métodos para comparar diferentes abordagens de preço justo,
-            margem de segurança e geração de renda.
+            Use os três métodos para comparar diferentes abordagens de preço
+            justo, margem de segurança e geração de renda.
           </p>
         </div>
 
@@ -188,12 +192,12 @@ export default function HomePage() {
         <div className="home-section-header">
           <div>
             <span className="home-section-kicker">Fluxo recomendado</span>
-            <h2>Do valuation ao acompanhamento da carteira</h2>
+            <h2>Da análise individual ao acompanhamento real</h2>
           </div>
 
           <p>
-            A navegação foi organizada para o usuário sair da análise individual do ativo
-            até a gestão de carteira e alertas.
+            A navegação foi separada para diferenciar simulação hipotética de
+            acompanhamento real da carteira do usuário.
           </p>
         </div>
 
@@ -210,28 +214,30 @@ export default function HomePage() {
 
       <section className="home-bottom-grid">
         <div className="home-feature-box portfolios">
-          <span>Carteiras</span>
-          <h2>Monte cenários com preço médio, quantidade e preço teto.</h2>
+          <span>Minhas Carteiras</span>
+          <h2>Acompanhe suas posições reais, preço médio e preço teto.</h2>
           <p>
-            Cadastre ativos, acompanhe sua posição e use os cálculos como apoio para
-            analisar oportunidades de compra.
+            Use esta área para controlar ativos que você realmente possui,
+            visualizar valor investido, valor atual, rentabilidade e alertas
+            configurados.
           </p>
 
           <Link className="primary-btn" to="/portfolios">
-            Gerenciar carteiras
+            Gerenciar minhas carteiras
           </Link>
         </div>
 
         <div className="home-feature-box alerts">
-          <span>Alertas</span>
-          <h2>Acompanhe eventos gerados pelos seus limites de preço.</h2>
+          <span>Simulador</span>
+          <h2>Teste uma carteira hipotética antes de salvar.</h2>
           <p>
-            A área de alertas ajuda a validar o funcionamento do monitoramento automático
-            e fortalece a demonstração do projeto.
+            Monte cenários com ativos, quantidade, preço médio e preço teto sem
+            alterar suas carteiras reais. Depois, salve como carteira se fizer
+            sentido.
           </p>
 
-          <Link className="secondary-btn" to="/alerts">
-            Ver alertas
+          <Link className="secondary-btn" to="/simulator">
+            Abrir simulador
           </Link>
         </div>
       </section>

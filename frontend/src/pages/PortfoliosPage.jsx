@@ -1,8 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import AlertForm from "../components/AlertForm";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import PortfolioAssetsSection from "../components/PortfolioAssetsSection";
 import PortfolioForm from "../components/PortfolioForm";
 import PortfolioItemForm from "../components/PortfolioItemForm";
-import PortfolioSimulationPanel from "../components/PortfolioSimulationPanel";
 import PortfolioSummary from "../components/PortfolioSummary";
 import { useAuth } from "../contexts/AuthContext";
 import {
@@ -12,7 +11,6 @@ import {
   deletePortfolio,
   deletePortfolioAlert,
   deletePortfolioItem,
-  getPortfolioSimulation,
   listPortfolios,
   updatePortfolio,
   updatePortfolioItem,
@@ -31,24 +29,6 @@ const EMPTY_ITEM_FORM = {
   target_price: "",
   notes: "",
 };
-
-function formatCurrency(value) {
-  const numericValue = Number(value ?? 0);
-
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(Number.isFinite(numericValue) ? numericValue : 0);
-}
-
-function formatPercent(value) {
-  const numericValue = Number(value ?? 0);
-
-  return `${new Intl.NumberFormat("pt-BR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(Number.isFinite(numericValue) ? numericValue : 0)}%`;
-}
 
 function extractErrorMessage(error, fallbackMessage) {
   const responseData = error?.response?.data;
@@ -89,11 +69,14 @@ function getDefaultAlertForm(item) {
 
 export default function PortfoliosPage() {
   const { accessToken } = useAuth();
+  const portfolioFormRef = useRef(null);
 
   const [portfolios, setPortfolios] = useState([]);
   const [selectedPortfolioId, setSelectedPortfolioId] = useState(null);
+  const [portfolioSearch, setPortfolioSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [pageError, setPageError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const [portfolioForm, setPortfolioForm] = useState(EMPTY_PORTFOLIO_FORM);
   const [portfolioSubmitting, setPortfolioSubmitting] = useState(false);
@@ -106,15 +89,27 @@ export default function PortfoliosPage() {
   const [alertForms, setAlertForms] = useState({});
   const [alertSubmittingId, setAlertSubmittingId] = useState(null);
 
-  const [simulation, setSimulation] = useState(null);
-  const [simulationLoading, setSimulationLoading] = useState(false);
-  const [simulationError, setSimulationError] = useState("");
-
   const selectedPortfolio = useMemo(
     () =>
-      portfolios.find((portfolio) => portfolio.id === selectedPortfolioId) ?? null,
+      portfolios.find((portfolio) => portfolio.id === selectedPortfolioId) ??
+      null,
     [portfolios, selectedPortfolioId],
   );
+
+  const filteredPortfolios = useMemo(() => {
+    const search = portfolioSearch.trim().toLowerCase();
+
+    if (!search) {
+      return portfolios;
+    }
+
+    return portfolios.filter((portfolio) => {
+      const name = portfolio.name?.toLowerCase() ?? "";
+      const description = portfolio.description?.toLowerCase() ?? "";
+
+      return name.includes(search) || description.includes(search);
+    });
+  }, [portfolioSearch, portfolios]);
 
   const loadPortfolios = useCallback(
     async (preferredPortfolioId = null) => {
@@ -157,35 +152,6 @@ export default function PortfoliosPage() {
     [accessToken],
   );
 
-  const loadSimulation = useCallback(
-    async (portfolioId) => {
-      if (!accessToken || !portfolioId) {
-        setSimulation(null);
-        setSimulationError("");
-        return;
-      }
-
-      try {
-        setSimulationLoading(true);
-        setSimulationError("");
-
-        const data = await getPortfolioSimulation(portfolioId, accessToken);
-        setSimulation(data);
-      } catch (error) {
-        setSimulation(null);
-        setSimulationError(
-          extractErrorMessage(
-            error,
-            "Não foi possível carregar a simulação da carteira.",
-          ),
-        );
-      } finally {
-        setSimulationLoading(false);
-      }
-    },
-    [accessToken],
-  );
-
   useEffect(() => {
     loadPortfolios();
   }, [loadPortfolios]);
@@ -195,16 +161,6 @@ export default function PortfoliosPage() {
     setItemEditingId(null);
     setAlertForms({});
   }, [selectedPortfolioId]);
-
-  useEffect(() => {
-    if (!selectedPortfolioId) {
-      setSimulation(null);
-      setSimulationError("");
-      return;
-    }
-
-    loadSimulation(selectedPortfolioId);
-  }, [selectedPortfolioId, loadSimulation]);
 
   function handlePortfolioFieldChange(event) {
     const { name, value } = event.target;
@@ -242,23 +198,49 @@ export default function PortfoliosPage() {
     setItemEditingId(null);
   }
 
+  function scrollToPortfolioForm() {
+    portfolioFormRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }
+
   async function handlePortfolioSubmit(event) {
     event.preventDefault();
-    setPortfolioSubmitting(true);
-    setPageError("");
+
+    if (!portfolioForm.name.trim()) {
+      setPageError("Informe o nome da carteira.");
+      return;
+    }
 
     try {
+      setPortfolioSubmitting(true);
+      setPageError("");
+      setSuccessMessage("");
+
       if (portfolioEditingId) {
-        const updated = await updatePortfolio(
+        const updatedPortfolio = await updatePortfolio(
           portfolioEditingId,
-          portfolioForm,
+          {
+            name: portfolioForm.name.trim(),
+            description: portfolioForm.description.trim(),
+          },
           accessToken,
         );
 
-        await loadPortfolios(updated.id);
+        await loadPortfolios(updatedPortfolio.id);
+        setSuccessMessage("Carteira atualizada com sucesso.");
       } else {
-        const created = await createPortfolio(portfolioForm, accessToken);
-        await loadPortfolios(created.id);
+        const createdPortfolio = await createPortfolio(
+          {
+            name: portfolioForm.name.trim(),
+            description: portfolioForm.description.trim(),
+          },
+          accessToken,
+        );
+
+        await loadPortfolios(createdPortfolio.id);
+        setSuccessMessage("Carteira criada com sucesso.");
       }
 
       resetPortfolioForm();
@@ -269,6 +251,15 @@ export default function PortfoliosPage() {
     } finally {
       setPortfolioSubmitting(false);
     }
+  }
+
+  function handleEditPortfolio(portfolio) {
+    setPortfolioEditingId(portfolio.id);
+    setPortfolioForm({
+      name: portfolio.name ?? "",
+      description: portfolio.description ?? "",
+    });
+    scrollToPortfolioForm();
   }
 
   async function handleDeletePortfolio(portfolioId) {
@@ -282,21 +273,17 @@ export default function PortfoliosPage() {
 
     try {
       setPageError("");
+      setSuccessMessage("");
+
       await deletePortfolio(portfolioId, accessToken);
       await loadPortfolios();
+
+      setSuccessMessage("Carteira excluída com sucesso.");
     } catch (error) {
       setPageError(
         extractErrorMessage(error, "Não foi possível excluir a carteira."),
       );
     }
-  }
-
-  function handleEditPortfolio(portfolio) {
-    setPortfolioEditingId(portfolio.id);
-    setPortfolioForm({
-      name: portfolio.name,
-      description: portfolio.description ?? "",
-    });
   }
 
   async function handleItemSubmit(event) {
@@ -308,10 +295,11 @@ export default function PortfoliosPage() {
 
     setItemSubmitting(true);
     setPageError("");
+    setSuccessMessage("");
 
     const cleanTicker = itemForm.ticker
-  ? itemForm.ticker.trim().split(" - ")[0].split(" ")[0].toUpperCase()
-  : "";
+      ? itemForm.ticker.trim().split(" - ")[0].split(" ")[0].toUpperCase()
+      : "";
 
     const payload = {
       portfolio: selectedPortfolio.id,
@@ -330,12 +318,13 @@ export default function PortfoliosPage() {
     try {
       if (itemEditingId) {
         await updatePortfolioItem(itemEditingId, payload, accessToken);
+        setSuccessMessage("Ativo atualizado com sucesso.");
       } else {
         await createPortfolioItem(payload, accessToken);
+        setSuccessMessage("Ativo adicionado à carteira.");
       }
 
       await loadPortfolios(selectedPortfolio.id);
-      await loadSimulation(selectedPortfolio.id);
       resetItemForm();
     } catch (error) {
       setPageError(
@@ -348,7 +337,6 @@ export default function PortfoliosPage() {
 
   function handleEditItem(item) {
     setItemEditingId(item.id);
-  
     setItemForm({
       asset: String(item.asset),
       ticker: item.asset_ticker || "",
@@ -370,9 +358,12 @@ export default function PortfoliosPage() {
 
     try {
       setPageError("");
+      setSuccessMessage("");
+
       await deletePortfolioItem(itemId, accessToken);
       await loadPortfolios(selectedPortfolio.id);
-      await loadSimulation(selectedPortfolio.id);
+
+      setSuccessMessage("Ativo removido da carteira.");
     } catch (error) {
       setPageError(
         extractErrorMessage(error, "Não foi possível excluir o item."),
@@ -415,6 +406,7 @@ export default function PortfoliosPage() {
     try {
       setAlertSubmittingId(item.id);
       setPageError("");
+      setSuccessMessage("");
 
       await createPortfolioAlert(
         {
@@ -427,6 +419,8 @@ export default function PortfoliosPage() {
 
       resetAlertForm(item);
       await loadPortfolios(selectedPortfolio.id);
+
+      setSuccessMessage("Alerta criado com sucesso.");
     } catch (error) {
       setPageError(
         extractErrorMessage(error, "Não foi possível criar o alerta."),
@@ -443,8 +437,12 @@ export default function PortfoliosPage() {
 
     try {
       setPageError("");
+      setSuccessMessage("");
+
       await deletePortfolioAlert(alertId, accessToken);
       await loadPortfolios(selectedPortfolio.id);
+
+      setSuccessMessage("Alerta excluído com sucesso.");
     } catch (error) {
       setPageError(
         extractErrorMessage(error, "Não foi possível excluir o alerta."),
@@ -453,108 +451,145 @@ export default function PortfoliosPage() {
   }
 
   return (
-    <div className="stack">
-      <div className="page-header">
+    <div className="portfolios-page">
+      <header className="page-header compact portfolio-page-header">
         <div>
-          <h2>Carteiras</h2>
+          <span className="portfolio-page-kicker">Carteiras reais</span>
+          <h2>Minhas Carteiras</h2>
           <p className="muted">
-            Organize seus ativos, acompanhe a posição e crie alertas por preço.
+            Crie e acompanhe suas carteiras reais com preço médio, preço teto,
+            rentabilidade e alertas por ativo.
           </p>
         </div>
 
-        <button
-          className="secondary-btn small-btn"
-          type="button"
-          onClick={() => {
-            loadPortfolios(selectedPortfolioId);
-            if (selectedPortfolioId) {
-              loadSimulation(selectedPortfolioId);
-            }
-          }}
-        >
-          Atualizar
-        </button>
-      </div>
+        <div className="portfolio-header-actions">
+          <button
+            type="button"
+            className="secondary-btn small-btn"
+            onClick={() => loadPortfolios(selectedPortfolioId)}
+          >
+            Atualizar dados
+          </button>
+        </div>
+      </header>
 
-      {pageError && <p className="error-text">{pageError}</p>}
+      {pageError && <div className="error-message">{pageError}</div>}
+      {successMessage && <div className="success-message">{successMessage}</div>}
 
-      <div className="portfolio-layout">
-        <aside className="portfolio-sidebar stack">
-          <div className="card">
-            <h3 className="section-title">Minhas carteiras</h3>
+      <section className="portfolio-create-area" ref={portfolioFormRef}>
+        <PortfolioForm
+          form={portfolioForm}
+          onChange={handlePortfolioFieldChange}
+          onSubmit={handlePortfolioSubmit}
+          onCancel={resetPortfolioForm}
+          submitting={portfolioSubmitting}
+          editing={Boolean(portfolioEditingId)}
+        />
+      </section>
+
+      <div className="portfolio-workspace">
+        <aside className="portfolio-sidebar">
+          <div className="card portfolio-list-card">
+            <div className="portfolio-list-header">
+              <div>
+                <h3 className="section-title">Carteiras cadastradas</h3>
+                <p className="muted">
+                  Selecione uma carteira para visualizar e gerenciar os ativos.
+                </p>
+              </div>
+            </div>
+
+            <div className="portfolio-search-box">
+              <input
+                type="text"
+                value={portfolioSearch}
+                onChange={(event) => setPortfolioSearch(event.target.value)}
+                placeholder="Buscar carteira..."
+              />
+            </div>
 
             {loading ? (
               <p className="muted">Carregando carteiras...</p>
             ) : portfolios.length === 0 ? (
-              <p className="muted">
-                Você ainda não possui carteiras cadastradas.
-              </p>
+              <div className="empty-state compact">
+                <strong>Nenhuma carteira cadastrada</strong>
+                <span>Crie sua primeira carteira usando o formulário acima.</span>
+              </div>
+            ) : filteredPortfolios.length === 0 ? (
+              <div className="empty-state compact">
+                <strong>Nenhuma carteira encontrada</strong>
+                <span>Tente outro termo na busca.</span>
+              </div>
             ) : (
               <div className="portfolio-list">
-                {portfolios.map((portfolio) => (
-                  <div
+                {filteredPortfolios.map((portfolio) => (
+                  <article
                     key={portfolio.id}
                     className={`portfolio-list-item ${
-                      selectedPortfolioId === portfolio.id ? "active" : ""
+                      portfolio.id === selectedPortfolioId ? "active" : ""
                     }`}
                   >
                     <button
-                      className="portfolio-list-button"
                       type="button"
+                      className="portfolio-list-button"
                       onClick={() => setSelectedPortfolioId(portfolio.id)}
                     >
-                      <div className="portfolio-list-main">
+                      <span className="portfolio-list-main">
                         <strong>{portfolio.name}</strong>
-                        <span className="muted">
-                          {portfolio.total_items} item(ns)
-                        </span>
-                      </div>
+                        <span>{portfolio.total_items} ativo(s)</span>
+                        {portfolio.description && (
+                          <small>{portfolio.description}</small>
+                        )}
+                      </span>
                     </button>
 
                     <div className="portfolio-list-actions">
                       <button
-                        className="secondary-btn small-btn"
                         type="button"
+                        className="secondary-btn"
                         onClick={() => handleEditPortfolio(portfolio)}
                       >
                         Editar
                       </button>
 
                       <button
-                        className="danger-btn small-btn"
                         type="button"
+                        className="danger-btn"
                         onClick={() => handleDeletePortfolio(portfolio.id)}
                       >
                         Excluir
                       </button>
                     </div>
-                  </div>
+                  </article>
                 ))}
               </div>
             )}
           </div>
-
-          <PortfolioForm
-            form={portfolioForm}
-            onChange={handlePortfolioFieldChange}
-            onSubmit={handlePortfolioSubmit}
-            onCancel={resetPortfolioForm}
-            submitting={portfolioSubmitting}
-            editing={Boolean(portfolioEditingId)}
-          />
         </aside>
 
         <section className="portfolio-content stack">
-          <PortfolioSummary portfolio={selectedPortfolio} />
+          <div className="portfolio-context-card">
+            <span>Carteira selecionada</span>
+            <h3>{selectedPortfolio?.name || "Selecione uma carteira"}</h3>
+            <p>
+              {selectedPortfolio?.description ||
+                "Selecione uma carteira na lateral para visualizar os detalhes e os ativos cadastrados."}
+            </p>
 
-          {selectedPortfolio ? (
-            <PortfolioSimulationPanel
-              simulation={simulation}
-              loading={simulationLoading}
-              error={simulationError}
-              onRefresh={() => loadSimulation(selectedPortfolio.id)}
-            />
-          ) : null}
+            {selectedPortfolio && (
+              <div className="portfolio-context-actions">
+                <button
+                  type="button"
+                  className="secondary-btn small-btn"
+                  onClick={() => handleEditPortfolio(selectedPortfolio)}
+                >
+                  Editar carteira
+                </button>
+              </div>
+            )}
+          </div>
+
+          <PortfolioSummary portfolio={selectedPortfolio} />
 
           <PortfolioItemForm
             portfolioSelected={Boolean(selectedPortfolio)}
@@ -567,178 +602,17 @@ export default function PortfoliosPage() {
             editing={Boolean(itemEditingId)}
           />
 
-          <div className="card">
-            <h3 className="section-title">Ativos da carteira</h3>
-
-            {!selectedPortfolio ? (
-              <p className="muted">
-                Selecione uma carteira para visualizar os ativos.
-              </p>
-            ) : selectedPortfolio.items?.length === 0 ? (
-              <p className="muted">Nenhum ativo cadastrado nesta carteira.</p>
-            ) : (
-              <div className="portfolio-item-list">
-                {selectedPortfolio.items.map((item) => {
-                  const alertForm = getAlertForm(item);
-
-                  return (
-                    <div className="portfolio-item-card" key={item.id}>
-                      <div className="portfolio-item-head">
-                        <div>
-                          <h4>
-                            {item.asset_ticker} - {item.asset_name}
-                          </h4>
-                          <p className="muted">
-                            {item.notes || "Sem observações para esta posição."}
-                          </p>
-                        </div>
-
-                        <div className="button-row wrap">
-                          <button
-                            className="secondary-btn small-btn"
-                            type="button"
-                            onClick={() => handleEditItem(item)}
-                          >
-                            Editar item
-                          </button>
-
-                          <button
-                            className="danger-btn small-btn"
-                            type="button"
-                            onClick={() => handleDeleteItem(item.id)}
-                          >
-                            Excluir item
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="portfolio-item-grid">
-                        <div className="result-item">
-                          <span className="muted">Quantidade</span>
-                          <strong>{item.quantity}</strong>
-                        </div>
-
-                        <div className="result-item">
-                          <span className="muted">Preço médio</span>
-                          <strong>{formatCurrency(item.average_price)}</strong>
-                        </div>
-
-                        <div className="result-item">
-                          <span className="muted">Preço atual</span>
-                          <strong>{formatCurrency(item.current_price)}</strong>
-                        </div>
-
-                        <div className="result-item">
-                          <span className="muted">Preço teto</span>
-                          <strong>
-                            {item.target_price
-                              ? formatCurrency(item.target_price)
-                              : "Não definido"}
-                          </strong>
-                        </div>
-
-                        <div className="result-item">
-                          <span className="muted">Valor investido</span>
-                          <strong>{formatCurrency(item.invested_amount)}</strong>
-                        </div>
-
-                        <div className="result-item">
-                          <span className="muted">Valor atual</span>
-                          <strong>{formatCurrency(item.current_value)}</strong>
-                        </div>
-
-                        <div className="result-item">
-                          <span className="muted">Ganho/Perda</span>
-                          <strong>{formatCurrency(item.unrealized_gain)}</strong>
-                        </div>
-
-                        <div className="result-item">
-                          <span className="muted">Rentabilidade</span>
-                          <strong>{formatPercent(item.unrealized_gain_pct)}</strong>
-                        </div>
-
-                        <div className="result-item">
-                          <span className="muted">Abaixo do teto?</span>
-                          <strong>{item.is_below_target ? "Sim" : "Não"}</strong>
-                        </div>
-
-                        <div className="result-item">
-                          <span className="muted">Distância até o teto</span>
-                          <strong>
-                            {item.distance_to_target !== null
-                              ? formatCurrency(item.distance_to_target)
-                              : "Não aplicável"}
-                          </strong>
-                        </div>
-                      </div>
-
-                      <div className="portfolio-alert-section">
-                        <h5>Alertas deste ativo</h5>
-
-                        {item.alerts?.length > 0 ? (
-                          <div className="alert-list">
-                            {item.alerts.map((alert) => (
-                              <div className="alert-chip" key={alert.id}>
-                                <div className="chip-label">
-                                  <strong>
-                                    {alert.alert_type === "below_or_equal"
-                                      ? "Preço menor ou igual"
-                                      : "Preço maior ou igual"}
-                                  </strong>
-                                  <span className="muted">
-                                    Disparo em {formatCurrency(alert.threshold_price)}
-                                  </span>
-                                  <span className="muted">
-                                    Atual: {formatCurrency(alert.current_price)}
-                                  </span>
-                                </div>
-
-                                <div className="chip-actions">
-                                  <span
-                                    className={`status-pill ${
-                                      alert.triggered_now ? "status-hit" : "status-idle"
-                                    }`}
-                                  >
-                                    {alert.triggered_now
-                                      ? "Disparando agora"
-                                      : "Aguardando"}
-                                  </span>
-
-                                  <button
-                                    className="danger-btn small-btn"
-                                    type="button"
-                                    onClick={() => handleDeleteAlert(alert.id)}
-                                  >
-                                    Excluir alerta
-                                  </button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="muted">Nenhum alerta configurado.</p>
-                        )}
-
-                        <div className="card soft-card">
-                          <h5>Novo alerta</h5>
-
-                          <AlertForm
-                            form={alertForm}
-                            onChange={(event) =>
-                              handleAlertFieldChange(item, event)
-                            }
-                            onSubmit={(event) => handleAlertSubmit(item, event)}
-                            onCancel={() => resetAlertForm(item)}
-                            submitting={alertSubmittingId === item.id}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+          <PortfolioAssetsSection
+            selectedPortfolio={selectedPortfolio}
+            getAlertForm={getAlertForm}
+            onEditItem={handleEditItem}
+            onDeleteItem={handleDeleteItem}
+            onAlertChange={handleAlertFieldChange}
+            onAlertSubmit={handleAlertSubmit}
+            onAlertCancel={resetAlertForm}
+            onDeleteAlert={handleDeleteAlert}
+            alertSubmittingId={alertSubmittingId}
+          />
         </section>
       </div>
     </div>
