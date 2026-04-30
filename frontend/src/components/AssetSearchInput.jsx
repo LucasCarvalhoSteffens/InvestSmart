@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { searchAssets } from "../services/assetsApi";
@@ -193,3 +195,9 @@ export default function AssetSearchInput({ value, onChange, disabled }) {
     </div>
   );
 }
+
+AssetSearchInput.propTypes = {
+  value: PropTypes.string,
+  onChange: PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
+};

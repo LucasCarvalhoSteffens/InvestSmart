@@ -45,9 +45,7 @@ function cleanTicker(value) {
   }
   
   function createSimulationItemId(ticker) {
-    const hasRandomUuid =
-      typeof globalThis.crypto !== "undefined" &&
-      typeof globalThis.crypto.randomUUID === "function";
+    const hasRandomUuid = globalThis.crypto?.randomUUID !== undefined;
   
     if (hasRandomUuid) {
       return globalThis.crypto.randomUUID();

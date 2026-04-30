@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 function formatCurrency(value) {
     const numericValue = Number(value ?? 0);
   
@@ -68,3 +70,15 @@ function formatCurrency(value) {
       </div>
     );
   }
+
+  PortfolioSummary.propTypes = {
+    portfolio: PropTypes.shape({
+      name: PropTypes.string,
+      description: PropTypes.string,
+      total_items: PropTypes.number,
+      total_invested: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      total_current_value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      total_unrealized_gain: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      total_unrealized_gain_pct: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    }).isRequired,
+  };

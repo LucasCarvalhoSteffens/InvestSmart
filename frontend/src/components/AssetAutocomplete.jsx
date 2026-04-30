@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { searchAssets } from "../services/assetsApi";
@@ -225,3 +227,12 @@ export default function AssetAutocomplete({
     </div>
   );
 }
+
+AssetAutocomplete.propTypes = {
+  value: PropTypes.string,
+  onChange: PropTypes.func.isRequired,
+  onAssetSelected: PropTypes.func,
+  label: PropTypes.string,
+  placeholder: PropTypes.string,
+  disabled: PropTypes.bool,
+};

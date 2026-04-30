@@ -27,6 +27,7 @@ export async function createPortfolio(payload, access) {
     payload,
     buildConfig(access),
   );
+
   return data;
 }
 
@@ -36,6 +37,7 @@ export async function updatePortfolio(portfolioId, payload, access) {
     payload,
     buildConfig(access),
   );
+
   return data;
 }
 
@@ -48,6 +50,7 @@ export async function listPortfolioItems(portfolioId, access) {
     "/portfolios/items/",
     buildConfig(access, { portfolio_id: portfolioId }),
   );
+
   return data;
 }
 
@@ -57,6 +60,7 @@ export async function createPortfolioItem(payload, access) {
     payload,
     buildConfig(access),
   );
+
   return data;
 }
 
@@ -66,6 +70,7 @@ export async function updatePortfolioItem(itemId, payload, access) {
     payload,
     buildConfig(access),
   );
+
   return data;
 }
 
@@ -78,6 +83,7 @@ export async function listPortfolioAlerts(filters, access) {
     "/portfolios/alerts/",
     buildConfig(access, filters),
   );
+
   return data;
 }
 
@@ -87,6 +93,7 @@ export async function createPortfolioAlert(payload, access) {
     payload,
     buildConfig(access),
   );
+
   return data;
 }
 
@@ -96,6 +103,7 @@ export async function updatePortfolioAlert(alertId, payload, access) {
     payload,
     buildConfig(access),
   );
+
   return data;
 }
 
@@ -104,39 +112,43 @@ export async function deletePortfolioAlert(alertId, access) {
 }
 
 export async function getPortfolioSimulation(portfolioId, access) {
-    const { data } = await http.get(
-      `/portfolios/${portfolioId}/simulation/`,
-      buildConfig(access),
-    );
-  
-    return data;
-  }
+  const { data } = await http.get(
+    `/portfolios/${portfolioId}/simulation/`,
+    buildConfig(access),
+  );
 
-  export async function listPortfolioAlertEvents(filters = {}, access) {
-    const { data } = await http.get(
-      "/portfolios/alert-events/",
-      buildConfig(access, filters),
-    );
-  
-    return data;
-  }
-  
-  export async function checkPortfolioAlertEvents(payload = {}, access) {
-    const { data } = await http.post(
-      "/portfolios/alert-events/check/",
-      payload,
-      buildConfig(access),
-    );
-  
-    return data;
-  }
-  
-  export async function markPortfolioAlertEventAsRead(alertEventId, access) {
-    const { data } = await http.patch(
-      `/portfolios/alert-events/${alertEventId}/mark-as-read/`,
-      {},
-      buildConfig(access),
-    );
-  
-    return data;
-  }
+  return data;
+}
+
+export async function listPortfolioAlertEvents(filters, access) {
+  const queryFilters = filters ?? {};
+
+  const { data } = await http.get(
+    "/portfolios/alert-events/",
+    buildConfig(access, queryFilters),
+  );
+
+  return data;
+}
+
+export async function checkPortfolioAlertEvents(payload, access) {
+  const requestPayload = payload ?? {};
+
+  const { data } = await http.post(
+    "/portfolios/alert-events/check/",
+    requestPayload,
+    buildConfig(access),
+  );
+
+  return data;
+}
+
+export async function markPortfolioAlertEventAsRead(alertEventId, access) {
+  const { data } = await http.patch(
+    `/portfolios/alert-events/${alertEventId}/mark-as-read/`,
+    {},
+    buildConfig(access),
+  );
+
+  return data;
+}

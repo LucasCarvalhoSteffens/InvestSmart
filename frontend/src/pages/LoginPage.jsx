@@ -16,6 +16,7 @@ export default function LoginPage() {
 
   function handleChange(event) {
     const { name, value } = event.target;
+
     setForm((prev) => ({
       ...prev,
       [name]: value,
@@ -45,24 +46,28 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="form">
           <div className="form-group">
-            <label>Usuário</label>
+            <label htmlFor="username">Usuário</label>
             <input
+              id="username"
               type="text"
               name="username"
               value={form.username}
               onChange={handleChange}
               placeholder="Digite seu usuário"
+              autoComplete="username"
             />
           </div>
 
           <div className="form-group">
-            <label>Senha</label>
+            <label htmlFor="password">Senha</label>
             <input
+              id="password"
               type="password"
               name="password"
               value={form.password}
               onChange={handleChange}
               placeholder="Digite sua senha"
+              autoComplete="current-password"
             />
           </div>
 

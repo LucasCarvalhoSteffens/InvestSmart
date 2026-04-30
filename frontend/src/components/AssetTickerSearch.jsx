@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 import { useState } from "react";
 import { syncAssetByTicker } from "../services/assetsApi";
 
@@ -34,9 +36,12 @@ export default function AssetTickerSearch({ onAssetSelected }) {
 
   return (
     <div className="space-y-3">
-      <label className="block text-sm font-medium text-gray-700">
-        Buscar ativo
-      </label>
+      <label htmlFor="asset-ticker-search">Buscar ativo</label>
+
+      <input
+        id="asset-ticker-search"
+        type="text"
+      />
 
       <div className="flex gap-2">
         <input
@@ -82,3 +87,7 @@ export default function AssetTickerSearch({ onAssetSelected }) {
     </div>
   );
 }
+
+AssetTickerSearch.propTypes = {
+  onAssetSelected: PropTypes.func.isRequired,
+};
