@@ -1,9 +1,9 @@
+import PropTypes from "prop-types";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Bar,
   BarChart,
   CartesianGrid,
-  Cell,
   Legend,
   Line,
   LineChart,
@@ -15,6 +15,7 @@ import {
   YAxis,
 } from "recharts";
 
+import DashboardRecentAlerts from "../components/DashboardRecentAlerts";
 import { useAuth } from "../contexts/AuthContext";
 import {
   checkPortfolioAlertEvents,
@@ -24,25 +25,37 @@ import {
 } from "../services/portfoliosApi";
 
 const CHART_COLORS = [
-    "#2563eb", // azul
-    "#16a34a", // verde
-    "#f59e0b", // laranja
-    "#dc2626", // vermelho
-    "#7c3aed", // roxo
-    "#0891b2", // ciano
-    "#db2777", // rosa
-    "#65a30d", // lime
-  ];
-  
-  const BAR_COLORS = {
-    currentPrice: "#2563eb",
-    priceCeiling: "#16a34a",
-    projectedValue: "#7c3aed",
-  };
-  
-  function getResultVariant(value) {
-    return Number(value ?? 0) >= 0 ? "success" : "danger";
+  "#2563eb",
+  "#16a34a",
+  "#f59e0b",
+  "#dc2626",
+  "#7c3aed",
+  "#0891b2",
+  "#db2777",
+  "#65a30d",
+];
+
+const BAR_COLORS = {
+  currentPrice: "#2563eb",
+  priceCeiling: "#16a34a",
+  projectedValue: "#7c3aed",
+};
+
+function getResultVariant(value) {
+  return Number(value ?? 0) >= 0 ? "success" : "danger";
+}
+
+function normalizeList(data) {
+  if (Array.isArray(data)) {
+    return data;
   }
+
+  if (Array.isArray(data?.results)) {
+    return data.results;
+  }
+
+  return [];
+}
 
 function toNumber(value) {
   const numericValue = Number(value ?? 0);
@@ -64,16 +77,17 @@ function formatPercent(value) {
 }
 
 function DashboardKpiCard({ title, value, subtitle, variant = "primary" }) {
-    return (
-      <article className={`dashboard-kpi-card dashboard-kpi-card--${variant}`}>
-        <span className="dashboard-kpi-title">{title}</span>
-        <strong className="dashboard-kpi-value">{value}</strong>
-        {subtitle ? (
-          <small className="dashboard-kpi-subtitle">{subtitle}</small>
-        ) : null}
-      </article>
-    );
-  }
+  return (
+    <article className={`dashboard-kpi-card dashboard-kpi-card--${variant}`}>
+      <span className="dashboard-kpi-title">{title}</span>
+      <strong className="dashboard-kpi-value">{value}</strong>
+
+      {subtitle ? (
+        <small className="dashboard-kpi-subtitle">{subtitle}</small>
+      ) : null}
+    </article>
+  );
+}
 
 function SectionCard({ title, description, children }) {
   return (
@@ -82,6 +96,7 @@ function SectionCard({ title, description, children }) {
         <h3>{title}</h3>
         {description ? <p>{description}</p> : null}
       </div>
+
       {children}
     </article>
   );
@@ -95,26 +110,40 @@ export default function DashboardPage() {
   const [simulation, setSimulation] = useState(null);
   const [alertEvents, setAlertEvents] = useState([]);
   const [annualProjectionRate, setAnnualProjectionRate] = useState("8");
+
   const [loading, setLoading] = useState(true);
   const [checkingAlerts, setCheckingAlerts] = useState(false);
   const [error, setError] = useState("");
 
   const summary = simulation?.summary ?? {};
-  const items = simulation?.items ?? [];
+
+  const items = useMemo(() => simulation?.items ?? [], [simulation]);
 
   const loadPortfolios = useCallback(async () => {
-    if (!accessToken) return;
+    if (!accessToken) {
+      return;
+    }
 
     try {
       setLoading(true);
+      setError("");
+
       const data = await listPortfolios(accessToken);
-      setPortfolios(data);
+      const portfolioList = normalizeList(data);
+
+      setPortfolios(portfolioList);
 
       setSelectedPortfolioId((currentId) => {
-        if (currentId && data.some((portfolio) => String(portfolio.id) === String(currentId))) {
+        if (
+          currentId &&
+          portfolioList.some(
+            (portfolio) => String(portfolio.id) === String(currentId),
+          )
+        ) {
           return currentId;
         }
-        return data[0]?.id ? String(data[0].id) : "";
+
+        return portfolioList[0]?.id ? String(portfolioList[0].id) : "";
       });
     } catch {
       setError("Não foi possível carregar as carteiras.");
@@ -123,25 +152,31 @@ export default function DashboardPage() {
     }
   }, [accessToken]);
 
-  const loadDashboardData = useCallback(async (portfolioId) => {
-    if (!accessToken || !portfolioId) return;
+  const loadDashboardData = useCallback(
+    async (portfolioId) => {
+      if (!accessToken || !portfolioId) {
+        return;
+      }
 
-    try {
-      setLoading(true);
+      try {
+        setLoading(true);
+        setError("");
 
-      const [simulationData, alertData] = await Promise.all([
-        getPortfolioSimulation(portfolioId, accessToken),
-        listPortfolioAlertEvents({ portfolio_id: portfolioId }, accessToken),
-      ]);
+        const [simulationData, alertData] = await Promise.all([
+          getPortfolioSimulation(portfolioId, accessToken),
+          listPortfolioAlertEvents({ portfolio_id: portfolioId }, accessToken),
+        ]);
 
-      setSimulation(simulationData);
-      setAlertEvents(alertData);
-    } catch {
-      setError("Não foi possível carregar o dashboard.");
-    } finally {
-      setLoading(false);
-    }
-  }, [accessToken]);
+        setSimulation(simulationData);
+        setAlertEvents(normalizeList(alertData));
+      } catch {
+        setError("Não foi possível carregar o dashboard.");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [accessToken],
+  );
 
   useEffect(() => {
     loadPortfolios();
@@ -154,17 +189,22 @@ export default function DashboardPage() {
   }, [selectedPortfolioId, loadDashboardData]);
 
   async function handleCheckAlerts() {
-    if (!selectedPortfolioId) return;
+    if (!selectedPortfolioId || !accessToken) {
+      return;
+    }
 
     try {
       setCheckingAlerts(true);
+      setError("");
+
       await checkPortfolioAlertEvents(
         {
-          portfolio_id: selectedPortfolioId,
+          portfolio_id: Number(selectedPortfolioId),
           force_refresh: true,
         },
         accessToken,
       );
+
       await loadDashboardData(selectedPortfolioId);
     } catch {
       setError("Não foi possível verificar os alertas.");
@@ -175,9 +215,10 @@ export default function DashboardPage() {
 
   const allocationData = useMemo(
     () =>
-      items.map((item) => ({
+      items.map((item, index) => ({
         name: item.asset_ticker,
         value: toNumber(item.current_value),
+        fill: CHART_COLORS[index % CHART_COLORS.length],
       })),
     [items],
   );
@@ -205,8 +246,15 @@ export default function DashboardPage() {
   const opportunities = useMemo(
     () =>
       items
-        .filter((item) => toNumber(item.current_price) <= toNumber(item.price_ceiling))
-        .sort((a, b) => toNumber(b.estimated_return_pct) - toNumber(a.estimated_return_pct)),
+        .filter(
+          (item) =>
+            toNumber(item.current_price) <= toNumber(item.price_ceiling),
+        )
+        .sort(
+          (a, b) =>
+            toNumber(b.estimated_return_pct) -
+            toNumber(a.estimated_return_pct),
+        ),
     [items],
   );
 
@@ -227,14 +275,23 @@ export default function DashboardPage() {
             value={selectedPortfolioId}
             onChange={(event) => setSelectedPortfolioId(event.target.value)}
           >
-            {portfolios.map((portfolio) => (
-              <option key={portfolio.id} value={portfolio.id}>
-                {portfolio.name}
-              </option>
-            ))}
+            {portfolios.length === 0 ? (
+              <option value="">Nenhuma carteira encontrada</option>
+            ) : (
+              portfolios.map((portfolio) => (
+                <option key={portfolio.id} value={portfolio.id}>
+                  {portfolio.name}
+                </option>
+              ))
+            )}
           </select>
 
-          <button type="button" className="primary-btn" onClick={handleCheckAlerts}>
+          <button
+            type="button"
+            className="primary-btn"
+            onClick={handleCheckAlerts}
+            disabled={checkingAlerts || !selectedPortfolioId}
+          >
             {checkingAlerts ? "Verificando..." : "Verificar alertas"}
           </button>
         </div>
@@ -244,36 +301,36 @@ export default function DashboardPage() {
 
       <div className="dashboard-kpi-grid">
         <DashboardKpiCard
-            title="Valor investido"
-            value={formatCurrency(summary.total_invested)}
-            variant="primary"
+          title="Valor investido"
+          value={formatCurrency(summary.total_invested)}
+          variant="primary"
         />
 
         <DashboardKpiCard
-            title="Valor atual"
-            value={formatCurrency(summary.total_current_value)}
-            variant="info"
+          title="Valor atual"
+          value={formatCurrency(summary.total_current_value)}
+          variant="info"
         />
 
         <DashboardKpiCard
-            title="Resultado"
-            value={formatCurrency(summary.total_unrealized_gain)}
-            subtitle={formatPercent(summary.total_unrealized_gain_pct)}
-            variant={getResultVariant(summary.total_unrealized_gain)}
+          title="Resultado"
+          value={formatCurrency(summary.total_unrealized_gain)}
+          subtitle={formatPercent(summary.total_unrealized_gain_pct)}
+          variant={getResultVariant(summary.total_unrealized_gain)}
         />
 
         <DashboardKpiCard
-            title="Oportunidades"
-            value={summary.opportunities_count ?? 0}
-            variant="success"
+          title="Oportunidades"
+          value={summary.opportunities_count ?? 0}
+          variant="success"
         />
 
         <DashboardKpiCard
-            title="Alertas"
-            value={alertEvents.length}
-            variant="warning"
+          title="Alertas"
+          value={alertEvents.length}
+          variant="warning"
         />
-        </div>
+      </div>
 
       <div className="dashboard-grid-2">
         <SectionCard
@@ -287,18 +344,20 @@ export default function DashboardPage() {
               <YAxis />
               <Tooltip formatter={(value) => formatCurrency(value)} />
               <Legend />
+
               <Bar
                 dataKey="precoAtual"
                 name="Preço atual"
                 fill={BAR_COLORS.currentPrice}
                 radius={[6, 6, 0, 0]}
-                />
+              />
+
               <Bar
                 dataKey="precoTeto"
                 name="Preço teto"
                 fill={BAR_COLORS.priceCeiling}
                 radius={[6, 6, 0, 0]}
-                />
+              />
             </BarChart>
           </ResponsiveContainer>
         </SectionCard>
@@ -309,25 +368,18 @@ export default function DashboardPage() {
         >
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
-                <Pie
+              <Pie
                 data={allocationData}
                 dataKey="value"
                 nameKey="name"
                 outerRadius={95}
                 label
-                >
-                {allocationData.map((entry, index) => (
-                    <Cell
-                    key={entry.name}
-                    fill={CHART_COLORS[index % CHART_COLORS.length]}
-                    />
-                ))}
-                </Pie>
+              />
 
-                <Tooltip formatter={(value) => formatCurrency(value)} />
-                <Legend />
+              <Tooltip formatter={(value) => formatCurrency(value)} />
+              <Legend />
             </PieChart>
-            </ResponsiveContainer>
+          </ResponsiveContainer>
         </SectionCard>
       </div>
 
@@ -346,6 +398,7 @@ export default function DashboardPage() {
                   <th>Retorno estimado</th>
                 </tr>
               </thead>
+
               <tbody>
                 {opportunities.length > 0 ? (
                   opportunities.slice(0, 5).map((item) => (
@@ -366,26 +419,7 @@ export default function DashboardPage() {
           </div>
         </SectionCard>
 
-        <SectionCard
-          title="Alertas recentes"
-          description="Últimos eventos gerados pelo monitoramento da carteira."
-        >
-          <div className="alert-event-list">
-            {alertEvents.length > 0 ? (
-              alertEvents.slice(0, 5).map((event) => (
-                <div key={event.id} className="alert-event-card">
-                  <strong>{event.asset_ticker ?? "Ativo"}</strong>
-                  <span>{event.message}</span>
-                  <small>
-                    Atual: {formatCurrency(event.current_price)} | Teto: {formatCurrency(event.price_ceiling)}
-                  </small>
-                </div>
-              ))
-            ) : (
-              <div className="empty-chart-message">Nenhum alerta registrado.</div>
-            )}
-          </div>
-        </SectionCard>
+        <DashboardRecentAlerts alerts={alertEvents} />
       </div>
 
       <SectionCard
@@ -394,7 +428,7 @@ export default function DashboardPage() {
       >
         <div className="dashboard-projection-toolbar">
           <label>
-            Rentabilidade anual simulada (%)
+            <span>Rentabilidade anual simulada (%)</span>
             <input
               type="number"
               min="0"
@@ -412,23 +446,37 @@ export default function DashboardPage() {
             <YAxis />
             <Tooltip formatter={(value) => formatCurrency(value)} />
             <Legend />
+
             <Line
-                type="monotone"
-                dataKey="value"
-                name="Valor projetado"
-                stroke={BAR_COLORS.projectedValue}
-                strokeWidth={3}
-                dot={{
-                    r: 5,
-                    fill: BAR_COLORS.projectedValue,
-                }}
-                activeDot={{
-                    r: 7,
-                }}
-                />
+              type="monotone"
+              dataKey="value"
+              name="Valor projetado"
+              stroke={BAR_COLORS.projectedValue}
+              strokeWidth={3}
+              dot={{
+                r: 5,
+                fill: BAR_COLORS.projectedValue,
+              }}
+              activeDot={{
+                r: 7,
+              }}
+            />
           </LineChart>
         </ResponsiveContainer>
       </SectionCard>
     </section>
   );
 }
+
+DashboardKpiCard.propTypes = {
+  title: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  subtitle: PropTypes.string,
+  variant: PropTypes.string,
+};
+
+SectionCard.propTypes = {
+  title: PropTypes.string.isRequired,
+  description: PropTypes.string,
+  children: PropTypes.node.isRequired,
+};

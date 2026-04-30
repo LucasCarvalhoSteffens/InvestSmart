@@ -1,8 +1,11 @@
+/* eslint-disable react-refresh/only-export-components */
+import PropTypes from "prop-types";
 import {
   createContext,
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 
@@ -43,7 +46,7 @@ export function AuthProvider({ children }) {
     }
   }, [clearSession]);
 
-  async function signIn(username, password) {
+  const signIn = useCallback(async (username, password) => {
     const data = await login(username, password);
 
     setHttpAccessToken(data.access);
@@ -51,9 +54,9 @@ export function AuthProvider({ children }) {
 
     const me = await getMe();
     setUser(me);
-  }
+  }, []);
 
-  async function signOut() {
+  const signOut = useCallback(async () => {
     try {
       await logout();
     } catch {
@@ -61,7 +64,7 @@ export function AuthProvider({ children }) {
     } finally {
       clearSession();
     }
-  }
+  }, [clearSession]);
 
   useEffect(() => {
     setUnauthorizedHandler(clearSession);
@@ -72,21 +75,28 @@ export function AuthProvider({ children }) {
     };
   }, [bootstrapAuth, clearSession]);
 
+  const contextValue = useMemo(
+    () => ({
+      accessToken,
+      user,
+      loading,
+      isAuthenticated: !!user,
+      signIn,
+      signOut,
+    }),
+    [accessToken, user, loading, signIn, signOut]
+  );
+
   return (
-    <AuthContext.Provider
-      value={{
-        accessToken,
-        user,
-        loading,
-        isAuthenticated: !!user,
-        signIn,
-        signOut,
-      }}
-    >
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
 }
+
+AuthProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};
 
 export function useAuth() {
   return useContext(AuthContext);

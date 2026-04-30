@@ -10,7 +10,11 @@ export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    setSidebarOpen(false);
+    const timeoutId = globalThis.setTimeout(() => {
+      setSidebarOpen(false);
+    }, 0);
+  
+    return () => globalThis.clearTimeout(timeoutId);
   }, [location.pathname]);
 
   return (
