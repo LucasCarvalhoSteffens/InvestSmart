@@ -1,42 +1,57 @@
-import { Link, Outlet, useNavigate } from "react-router-dom";
-
+import { useEffect, useState } from "react";
+import { Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import Sidebar from "./Sidebar";
 
 export default function Layout() {
   const { user, signOut } = useAuth();
+  const location = useLocation();
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
 
   return (
-    <div className="app-shell">
-      <header className="topbar">
-        <div>
-          <h1 className="brand">InvestSmart</h1>
-          <p className="subtitle">Plataforma de análise fundamentalista</p>
-        </div>
+    <div className="app-layout">
+      <Sidebar
+        open={sidebarOpen}
+        user={user}
+        onClose={() => setSidebarOpen(false)}
+        onSignOut={signOut}
+      />
 
-        <div className="topbar-right">
-          {user?.username ? (
-            <span className="user-badge">{user.username}</span>
-          ) : null}
+      {sidebarOpen && (
+        <button
+          type="button"
+          className="sidebar-overlay"
+          onClick={() => setSidebarOpen(false)}
+          aria-label="Fechar menu lateral"
+        />
+      )}
 
-          <button type="button" className="secondary-btn small-btn" onClick={signOut}>
-            Sair
+      <div className="app-main-area">
+        <header className="app-topbar">
+          <button
+            type="button"
+            className="app-menu-btn"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Abrir menu lateral"
+          >
+            ☰
           </button>
-        </div>
-      </header>
 
-      <nav className="nav-links">
-        <Link to="/">Início</Link>
-        <Link to="/dashboard">Dashboard</Link>
-        <Link to="/portfolios">Carteiras</Link>
-        <Link to="/alerts">Alertas</Link>
-        <Link to="/graham">Graham</Link>
-        <Link to="/projected">Projetivo</Link>
-        <Link to="/barsi">Barsi</Link>
-      </nav>
+          <div className="app-topbar-brand">
+            <strong>InvestSmart</strong>
+            <small>Plataforma de análise fundamentalista</small>
+          </div>
+        </header>
 
-      <main>
-        <Outlet />
-      </main>
+        <main className="app-main-content">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }

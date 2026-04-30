@@ -326,12 +326,6 @@ export default function PortfoliosPage() {
     } else if (itemForm.asset) {
       payload.asset = itemForm.asset;
     }
-    
-    if (itemForm.ticker) {
-      payload.ticker = itemForm.ticker;
-    } else if (itemForm.asset) {
-      payload.asset = itemForm.asset;
-    }
 
     try {
       if (itemEditingId) {

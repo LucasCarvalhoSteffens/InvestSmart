@@ -1,8 +1,28 @@
-import { useState } from "react";
-import ResultCard from "../components/ResultCard";
+import { useMemo, useState } from "react";
 import AssetAutocomplete from "../components/AssetAutocomplete";
+import ValuationResultCard from "../components/ValuationResultCard";
 import { useAuth } from "../contexts/AuthContext";
 import { calculateBarsi } from "../services/valuationApi";
+
+const METHOD_BENEFITS = [
+  "Foca em dividendos e geração de renda",
+  "Permite definir um yield mínimo desejado",
+  "Ajuda a encontrar um preço teto de entrada",
+];
+
+function getApiError(err, fallback) {
+  const detail = err?.response?.data?.detail;
+
+  if (typeof detail === "string") {
+    return detail;
+  }
+
+  if (detail && typeof detail === "object") {
+    return Object.values(detail).flat().join(" ");
+  }
+
+  return err?.message || fallback;
+}
 
 export default function BarsiPage() {
   const { accessToken } = useAuth();
@@ -22,6 +42,10 @@ export default function BarsiPage() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  const selectedTicker = useMemo(() => {
+    return selectedAsset?.ticker || form.ticker || "";
+  }, [selectedAsset, form.ticker]);
+
   function handleChange(event) {
     const { name, value } = event.target;
 
@@ -34,7 +58,7 @@ export default function BarsiPage() {
   function handleTickerChange(ticker) {
     setForm((prev) => ({
       ...prev,
-      ticker: ticker.toUpperCase(),
+      ticker: String(ticker || "").toUpperCase(),
     }));
 
     setSelectedAsset(null);
@@ -43,13 +67,20 @@ export default function BarsiPage() {
   }
 
   function handleAssetSelected(asset) {
+    if (!asset) {
+      setSelectedAsset(null);
+      setResult(null);
+      setError("");
+      return;
+    }
+  
     setSelectedAsset(asset);
-
+  
     setForm((prev) => ({
       ...prev,
       ticker: asset.ticker,
     }));
-
+  
     setResult(null);
     setError("");
   }
@@ -60,31 +91,32 @@ export default function BarsiPage() {
       force_refresh: false,
       persist: false,
     };
-  
+
     if (form.target_yield) {
       payload.target_yield = form.target_yield;
     }
-  
+
     if (form.current_price) {
       payload.current_price = form.current_price;
     }
-  
+
     const dividends = [
       form.dividend_1,
       form.dividend_2,
       form.dividend_3,
       form.dividend_4,
     ].filter((value) => value !== "");
-  
+
     if (dividends.length > 0) {
       payload.dividends = dividends;
     }
-  
+
     return payload;
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
+
     setError("");
     setResult(null);
 
@@ -96,136 +128,153 @@ export default function BarsiPage() {
     setSubmitting(true);
 
     try {
-      const payload = buildPayload();
-      const data = await calculateBarsi(payload, accessToken);
+      const data = await calculateBarsi(buildPayload(), accessToken);
       setResult(data);
     } catch (err) {
-      setError(
-        err?.response?.data?.detail ||
-          err?.message ||
-          "Erro ao calcular Barsi."
-      );
+      setError(getApiError(err, "Erro ao calcular Barsi."));
     } finally {
       setSubmitting(false);
     }
   }
 
   return (
-    <div>
-      <div className="hero">
-        <h2>Método Barsi</h2>
-        <p>
-          Busque a ação pelo ticker e calcule o preço teto com dados obtidos da
-          API do Yahoo Finance.
-        </p>
-      </div>
+    <div className="valuation-page barsi-theme">
+      <section className="valuation-hero">
+        <div className="valuation-hero-content">
+          <span className="valuation-badge">Foco em dividendos</span>
+          <h2>Método Barsi</h2>
+          <p>
+            Calcule um preço teto considerando dividendos e yield alvo. É uma tela pensada para
+            investidores que avaliam geração de renda e margem de segurança.
+          </p>
 
-      <div className="card">
-        <form onSubmit={handleSubmit} className="form">
-          <AssetAutocomplete
-            label="Ticker da ação"
-            value={form.ticker}
-            onChange={handleTickerChange}
-            onAssetSelected={handleAssetSelected}
-            placeholder="Digite parte do ticker. Ex: PET, BBA, VALE"
-          />
+          <div className="valuation-hero-tags">
+            <span>Dividendos</span>
+            <span>Yield alvo</span>
+            <span>Preço teto</span>
+          </div>
+        </div>
 
-          {selectedAsset && (
-            <div className="info-box">
-              <p>
-                <strong>Ativo selecionado:</strong> {selectedAsset.ticker}
-              </p>
-              <p>
-                <strong>Nome:</strong> {selectedAsset.name}
-              </p>
-              <p>
-                <strong>Fonte:</strong> {selectedAsset.source}
-              </p>
+        <div className="valuation-formula-card">
+          <span>Ideia do cálculo</span>
+          <strong>Dividendos ÷ Yield alvo</strong>
+          <small>Exemplo: 0.0600 representa uma exigência de 6% ao ano.</small>
+        </div>
+      </section>
+
+      <section className="valuation-layout">
+        <div className="valuation-card valuation-form-card">
+          <div className="valuation-card-header">
+            <div>
+              <h3>Dados para cálculo</h3>
+              <p>Busque o ativo e ajuste os dividendos usados na estimativa.</p>
             </div>
-          )}
-
-          <div className="form-group">
-            <label>Target Yield</label>
-            <input
-              type="number"
-              step="0.0001"
-              name="target_yield"
-              value={form.target_yield}
-              onChange={handleChange}
-              placeholder="Ex: 0.0600"
-            />
-            <small>Exemplo: 0.0600 representa 6% ao ano.</small>
+            {selectedTicker && <span className="valuation-selected-pill">{selectedTicker}</span>}
           </div>
 
-          <div className="form-group">
-            <label>Preço atual manual, opcional</label>
-            <input
-              type="number"
-              step="0.01"
-              name="current_price"
-              value={form.current_price}
-              onChange={handleChange}
-              placeholder="Deixe vazio para buscar pela API"
+          <form className="valuation-form" onSubmit={handleSubmit}>
+            <AssetAutocomplete
+              value={form.ticker}
+              onChange={handleTickerChange}
+              onAssetSelected={handleAssetSelected}
+              label="Ativo"
+              placeholder="Digite o ticker. Ex: BBAS3, TAEE11, PETR4"
             />
+
+            {selectedAsset && (
+              <div className="selected-valuation-asset">
+                <div>
+                  <strong>{selectedAsset.ticker}</strong>
+                  <span>{selectedAsset.name}</span>
+                </div>
+                <small>{selectedAsset.source || "Yahoo Finance"}</small>
+              </div>
+            )}
+
+            <div className="valuation-input-grid">
+              <label className="valuation-field">
+                <span>Target Yield</span>
+                <input
+                  type="number"
+                  step="0.0001"
+                  name="target_yield"
+                  value={form.target_yield}
+                  onChange={handleChange}
+                  placeholder="Ex: 0.0600"
+                />
+                <small>Exemplo: 0.0600 representa 6% ao ano.</small>
+              </label>
+
+              <label className="valuation-field">
+                <span>Preço atual, opcional</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  name="current_price"
+                  value={form.current_price}
+                  onChange={handleChange}
+                  placeholder="Ex: 27.50"
+                />
+                <small>Use se quiser sobrescrever a cotação retornada pela API.</small>
+              </label>
+            </div>
+
+            <div className="valuation-dividend-box">
+              <div className="valuation-section-title">
+                <strong>Dividendos manuais</strong>
+                <span>Opcional</span>
+              </div>
+
+              <p>
+                Preencha apenas se quiser informar manualmente os dividendos usados no cálculo.
+                Caso contrário, o sistema tentará utilizar os dados retornados pela API.
+              </p>
+
+              <div className="valuation-input-grid dividend-grid">
+                {[1, 2, 3, 4].map((index) => (
+                  <label className="valuation-field" key={index}>
+                    <span>Dividendo {index}</span>
+                    <input
+                      type="number"
+                      step="0.0001"
+                      name={`dividend_${index}`}
+                      value={form[`dividend_${index}`]}
+                      onChange={handleChange}
+                      placeholder="Ex: 0.5000"
+                    />
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {error && <div className="valuation-error">{error}</div>}
+
+            <button className="primary-btn valuation-submit-btn" type="submit" disabled={submitting}>
+              {submitting ? "Buscando e calculando..." : "Calcular preço teto"}
+            </button>
+          </form>
+        </div>
+
+        <aside className="valuation-side-panel">
+          <div className="valuation-info-card">
+            <h4>Como interpretar</h4>
+            <ul>
+              {METHOD_BENEFITS.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
           </div>
 
-          <div className="form-group">
-            <label>Dividendo 1, opcional</label>
-            <input
-              type="number"
-              step="0.0001"
-              name="dividend_1"
-              value={form.dividend_1}
-              onChange={handleChange}
-              placeholder="Deixe vazio para buscar pela API"
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Dividendo 2, opcional</label>
-            <input
-              type="number"
-              step="0.0001"
-              name="dividend_2"
-              value={form.dividend_2}
-              onChange={handleChange}
-              placeholder="Deixe vazio para buscar pela API"
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Dividendo 3, opcional</label>
-            <input
-              type="number"
-              step="0.0001"
-              name="dividend_3"
-              value={form.dividend_3}
-              onChange={handleChange}
-              placeholder="Deixe vazio para buscar pela API"
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Dividendo 4, opcional</label>
-            <input
-              type="number"
-              step="0.0001"
-              name="dividend_4"
-              value={form.dividend_4}
-              onChange={handleChange}
-              placeholder="Deixe vazio para buscar pela API"
-            />
-          </div>
-
-          {error && <p className="error-text">{error}</p>}
-
-          <button className="primary-btn" type="submit" disabled={submitting}>
-            {submitting ? "Buscando e calculando..." : "Calcular Barsi"}
-          </button>
-        </form>
-      </div>
-
-      <ResultCard title="Resultado Barsi" result={result} />
+          <ValuationResultCard
+            result={result}
+            title="Resultado Barsi"
+            subtitle="Estimativa de preço teto com foco em dividendos."
+            primaryLabel="Preço teto estimado"
+            primaryKeys={["target_price", "ceiling_price", "barsi_price", "fair_price", "price"]}
+            accent="orange"
+          />
+        </aside>
+      </section>
     </div>
   );
 }
