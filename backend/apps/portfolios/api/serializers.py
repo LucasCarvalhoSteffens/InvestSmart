@@ -70,7 +70,13 @@ class PortfolioItemAlertSerializer(serializers.ModelSerializer):
         return value
 
 class PortfolioItemSerializer(serializers.ModelSerializer):
-    ticker = serializers.CharField(write_only=True, required=False)
+    ticker = serializers.CharField(write_only=True, required=False, allow_blank=True)
+
+    asset = serializers.PrimaryKeyRelatedField(
+        queryset=Asset.objects.all(),
+        required=False,
+        allow_null=True,
+    )
     asset_ticker = serializers.CharField(source="asset.ticker", read_only=True)
     asset_name = serializers.CharField(source="asset.name", read_only=True)
     current_price = serializers.DecimalField(
@@ -158,6 +164,11 @@ class PortfolioItemSerializer(serializers.ModelSerializer):
 
     def _resolve_asset_from_ticker(self, attrs):
         ticker = attrs.pop("ticker", None)
+
+        if not ticker:
+            return attrs
+        
+        ticker = str(ticker).strip().split(" - ")[0].split(" ")[0].upper()
 
         if not ticker:
             return attrs

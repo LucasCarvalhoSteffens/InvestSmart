@@ -1,4 +1,4 @@
-import AssetSelect from "./AssetSelect";
+import AssetSearchInput from "./AssetSearchInput";
 
 export default function PortfolioItemForm({
   portfolioSelected,
@@ -11,81 +11,68 @@ export default function PortfolioItemForm({
   editing,
 }) {
   return (
-    <div className="card">
-      <h3 className="section-title">
-        {editing ? "Editar item da carteira" : "Adicionar ativo"}
-      </h3>
+    <div className="form-card">
+      <h3>{editing ? "Editar item da carteira" : "Adicionar ativo"}</h3>
 
       {!portfolioSelected ? (
-        <p className="muted">
-          Selecione uma carteira para cadastrar ativos.
-        </p>
+        <p>Selecione uma carteira para cadastrar ativos.</p>
       ) : (
-        <form className="form" onSubmit={onSubmit}>
-          <AssetSelect value={form.asset} onChange={onAssetChange} />
+        <form onSubmit={onSubmit}>
+          <AssetSearchInput
+          value={form.ticker}
+          onChange={onAssetChange}
+          disabled={submitting}
+          />
 
-          <div className="form-group">
-            <label htmlFor="quantity">Quantidade</label>
+          <label>
+            Quantidade
             <input
-              id="quantity"
-              name="quantity"
               type="number"
-              min="1"
-              placeholder="Ex.: 10"
+              name="quantity"
               value={form.quantity}
               onChange={onTextChange}
+              min="1"
               required
             />
-          </div>
+          </label>
 
-          <div className="form-group">
-            <label htmlFor="average_price">Preço médio</label>
+          <label>
+            Preço médio
             <input
-              id="average_price"
-              name="average_price"
               type="number"
-              step="0.01"
-              min="0"
-              placeholder="Ex.: 25.40"
+              name="average_price"
               value={form.average_price}
               onChange={onTextChange}
+              min="0.01"
+              step="0.01"
               required
             />
-          </div>
+          </label>
 
-          <div className="form-group">
-            <label htmlFor="target_price">Preço teto</label>
+          <label>
+            Preço teto
             <input
-              id="target_price"
-              name="target_price"
               type="number"
-              step="0.01"
-              min="0"
-              placeholder="Ex.: 30.00"
+              name="target_price"
               value={form.target_price}
               onChange={onTextChange}
+              min="0.01"
+              step="0.01"
             />
-          </div>
+          </label>
 
-          <div className="form-group">
-            <label htmlFor="notes">Observações</label>
+          <label>
+            Observações
             <textarea
-              id="notes"
               name="notes"
-              rows="4"
-              placeholder="Anotações sobre a posição"
               value={form.notes}
               onChange={onTextChange}
             />
-          </div>
+          </label>
 
           <div className="button-row">
             <button className="primary-btn full-width" type="submit" disabled={submitting}>
-              {submitting
-                ? "Salvando..."
-                : editing
-                  ? "Atualizar item"
-                  : "Adicionar item"}
+              {submitting ? "Salvando..." : editing ? "Atualizar item" : "Adicionar item"}
             </button>
 
             {editing && (
