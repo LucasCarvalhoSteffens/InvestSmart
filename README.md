@@ -1,20 +1,22 @@
 # InvestSmart
 
-![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=alert_status)
-![Bugs](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=bugs)
-![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=vulnerabilities)
-![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=code_smells)
-![Coverage](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=coverage)
-![Duplicated Lines](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=duplicated_lines_density)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=LucasCarvalhoSteffens_InvestSmart)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=bugs)](https://sonarcloud.io/summary/new_code?id=LucasCarvalhoSteffens_InvestSmart)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=LucasCarvalhoSteffens_InvestSmart)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=LucasCarvalhoSteffens_InvestSmart)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=coverage)](https://sonarcloud.io/summary/new_code?id=LucasCarvalhoSteffens_InvestSmart)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=LucasCarvalhoSteffens_InvestSmart&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=LucasCarvalhoSteffens_InvestSmart)
 
-Plataforma web para análise fundamentalista de ações, cálculo multimétodo de preço justo, simulação de carteiras de investimento e alertas automáticos de preço em relação ao preço teto.
+Plataforma web para análise fundamentalista de ações, cálculo multimétodo de preço justo, simulação de carteiras de investimento, dashboards financeiros e alertas automáticos de preço em relação ao preço teto.
 
 O InvestSmart foi desenvolvido como projeto de Portfólio em Engenharia de Software, com foco em aplicar arquitetura em camadas, autenticação JWT, integração com dados externos, persistência real, testes automatizados, CI/CD e análise contínua de qualidade de código.
 
-> Status do projeto: em desenvolvimento  
-> Branch de referência: `main`  
-> Natureza do projeto: acadêmico/profissional  
-> Observação: este sistema possui finalidade educacional e de apoio à análise. Não constitui recomendação de investimento.
+> **Status:** em desenvolvimento  
+> **Branch principal:** `main`  
+> **Branch de evolução:** `Dev`  
+> **Última atualização considerada:** branch `main`, branch `Dev` e PR #18  
+> **Natureza:** projeto acadêmico/profissional  
+> **Aviso:** este sistema possui finalidade educacional e de apoio à análise. Não constitui recomendação de investimento.
 
 ---
 
@@ -25,45 +27,62 @@ O InvestSmart foi desenvolvido como projeto de Portfólio em Engenharia de Softw
 - [Principais Diferenciais](#principais-diferenciais)
 - [Stack Tecnológica](#stack-tecnológica)
 - [Arquitetura](#arquitetura)
-- [Funcionalidades Implementadas](#funcionalidades-implementadas)
+- [Funcionalidades](#funcionalidades)
 - [Métodos de Valuation](#métodos-de-valuation)
-- [Simulação de Carteiras](#simulação-de-carteiras)
+- [Carteiras e Simulação](#carteiras-e-simulação)
 - [Alertas Automáticos](#alertas-automáticos)
+- [Dashboard](#dashboard)
 - [Fluxos de Negócio](#fluxos-de-negócio)
 - [Endpoints Principais](#endpoints-principais)
 - [Modelos Principais](#modelos-principais)
 - [Estrutura do Projeto](#estrutura-do-projeto)
+- [Rotas do Frontend](#rotas-do-frontend)
 - [Variáveis de Ambiente](#variáveis-de-ambiente)
 - [Como Executar o Projeto](#como-executar-o-projeto)
 - [Como Testar](#como-testar)
+- [Testes Automatizados](#testes-automatizados)
+- [Cobertura de Testes](#cobertura-de-testes)
 - [Qualidade de Código](#qualidade-de-código)
+- [Segurança](#segurança)
 - [Roadmap](#roadmap)
 - [Contexto Acadêmico](#contexto-acadêmico)
+- [Licença](#licença)
 - [Autor](#autor)
 
 ---
 
 ## Objetivo
 
-O objetivo do InvestSmart é oferecer uma plataforma web integrada para auxiliar investidores pessoa física no estudo de análise fundamentalista, permitindo calcular preço justo de ações, comparar métodos de valuation, organizar carteiras simuladas e acompanhar oportunidades por meio de alertas.
+O objetivo do InvestSmart é oferecer uma plataforma web integrada para auxiliar investidores pessoa física no estudo de análise fundamentalista.
 
-A proposta central é reunir em um único ambiente funcionalidades que normalmente ficam distribuídas entre diferentes plataformas, planilhas ou ferramentas pagas.
+A aplicação permite:
+
+- calcular preço justo de ações por diferentes métodos;
+- comparar abordagens de valuation;
+- cadastrar e organizar carteiras simuladas;
+- acompanhar ativos por preço teto;
+- visualizar métricas consolidadas em dashboards;
+- gerar alertas automáticos quando o preço atual ultrapassar ou ficar abaixo do preço teto;
+- apoiar decisões educacionais por meio de dados, simulações e projeções.
+
+A proposta central é reunir em um único ambiente funcionalidades que normalmente ficam distribuídas entre planilhas, ferramentas pagas e plataformas separadas.
 
 ---
 
 ## Problema que o Projeto Resolve
 
-Investidores iniciantes e intermediários enfrentam dificuldades para analisar ações de forma organizada, pois muitas ferramentas disponíveis apresentam limitações como:
+Investidores iniciantes e intermediários enfrentam dificuldades para realizar análises fundamentalistas completas, pois muitas soluções existentes apresentam limitações como:
 
 - funcionalidades fragmentadas;
 - ausência de comparação entre métodos de valuation;
-- pouca personalização nos cálculos;
-- baixa integração entre análise de ativos e carteira;
+- baixa personalização dos cálculos;
+- dificuldade para integrar análise de ativos com carteiras;
+- falta de simulações consolidadas;
 - dificuldade para acompanhar oportunidades de preço;
 - dependência de planilhas manuais;
 - restrições em planos gratuitos de plataformas de mercado.
 
-O InvestSmart busca reduzir essa fragmentação por meio de uma solução própria, modular e evolutiva.
+O InvestSmart busca reduzir essa fragmentação por meio de uma solução própria, modular, navegável e evolutiva.
 
 ---
 
@@ -73,21 +92,25 @@ O InvestSmart busca reduzir essa fragmentação por meio de uma solução própr
 - Métodos de Graham, Barsi e Preço Teto Projetivo.
 - Persistência automática das análises realizadas.
 - Histórico de cálculos por método.
-- Autenticação com JWT e refresh token.
+- Autenticação com JWT.
 - Refresh token com cookie HTTP-only.
+- Renovação automática do access token.
 - Rotas protegidas no frontend.
-- Integração do frontend React com backend Django REST Framework.
+- Integração entre frontend React e backend Django REST Framework.
 - CRUD de ativos.
-- CRUD de carteiras por usuário autenticado.
-- CRUD de itens de carteira.
-- Simulação consolidada de carteira.
-- Priorização automática de preço teto por fonte.
-- Alertas automáticos de preço vs. preço teto.
-- Eventos de alerta com leitura/não leitura.
 - Integração com Yahoo Finance via `yfinance`.
 - Cache local de dados de mercado.
+- CRUD de carteiras por usuário autenticado.
+- CRUD de itens de carteira.
+- Alertas manuais por item.
+- Simulação consolidada de carteira.
+- Priorização automática do preço teto.
+- Eventos de alerta automático.
+- Tela específica para histórico de alertas.
+- Dashboard com gráficos, KPIs, oportunidades e projeções.
 - Testes automatizados no backend.
-- SonarCloud integrado ao GitHub Actions.
+- Testes automatizados no frontend com Vitest.
+- Pipeline de qualidade com GitHub Actions e SonarCloud.
 
 ---
 
@@ -111,7 +134,10 @@ O InvestSmart busca reduzir essa fragmentação por meio de uma solução própr
 - JavaScript
 - React Router DOM
 - Axios
-- CSS modularizado por estrutura de componentes
+- Recharts
+- Vitest
+- Testing Library
+- CSS estruturado para layout responsivo
 
 ### Banco de Dados
 
@@ -126,12 +152,13 @@ O InvestSmart busca reduzir essa fragmentação por meio de uma solução própr
 - Docker
 - Docker Compose
 - Coverage
+- Vitest Coverage
 
 ---
 
 ## Arquitetura
 
-O projeto segue uma arquitetura client-server em camadas.
+O projeto segue uma arquitetura **client-server em camadas**, separando apresentação, API, regras de negócio, persistência e integração externa.
 
 ```text
 Frontend React/Vite
@@ -151,15 +178,17 @@ Yahoo Finance / yfinance
 
 ### Camadas
 
-- **Camada de Apresentação:** frontend React, responsável pela navegação, telas, formulários e exibição dos resultados.
-- **Camada de API:** Django REST Framework, responsável pelos endpoints REST.
-- **Camada de Negócio:** serviços de valuation, simulação de carteira, alertas e sincronização de ativos.
-- **Camada de Persistência:** modelos Django e banco PostgreSQL.
-- **Camada de Integração Externa:** serviço de consulta ao Yahoo Finance via `yfinance`.
+| Camada | Responsabilidade |
+|---|---|
+| Apresentação | Interface React, rotas, formulários, dashboards e componentes visuais |
+| API | Endpoints REST com Django REST Framework |
+| Negócio | Serviços de valuation, simulação, alertas e sincronização de ativos |
+| Persistência | Models Django e banco PostgreSQL |
+| Integração externa | Consulta de cotações, indicadores e dividendos via Yahoo Finance |
 
 ---
 
-## Funcionalidades Implementadas
+## Funcionalidades
 
 ### Backend
 
@@ -183,6 +212,7 @@ Yahoo Finance / yfinance
 - Simulação de carteira.
 - Eventos de alerta automáticos.
 - Marcação de alerta como lido.
+- Verificação manual de alertas via endpoint.
 - Comando de gerenciamento para verificação automática de preço.
 - Testes unitários e de API.
 
@@ -198,26 +228,24 @@ Yahoo Finance / yfinance
 - Tela de login.
 - Gerenciamento global de autenticação com `AuthProvider`.
 - Bootstrap automático da sessão.
-- Renovação de access token via refresh.
+- Renovação de access token via refresh token.
 - Rotas protegidas.
+- Layout principal com sidebar.
 - Página inicial.
 - Página do método Graham.
 - Página do método Barsi.
 - Página do método Projetivo.
 - Página de carteiras.
-- Integração com APIs de:
-  - autenticação;
-  - ativos;
-  - valuation;
-  - carteiras.
-
-### Qualidade
-
-- Pipeline com GitHub Actions.
-- Integração com SonarCloud.
-- Execução de testes com coverage.
-- Configuração de ambiente de testes isolado.
-- Separação entre settings de desenvolvimento e settings de teste.
+- Página de alertas automáticos.
+- Dashboard com gráficos e KPIs.
+- Componentes reutilizáveis para:
+  - formulários de carteira;
+  - formulários de ativos;
+  - alertas;
+  - cards de resultado;
+  - painel de simulação;
+  - resumo de carteira.
+- Testes automatizados com Vitest.
 
 ---
 
@@ -225,15 +253,15 @@ Yahoo Finance / yfinance
 
 ### 1. Método Graham
 
-Método utilizado para estimar o preço justo de uma ação com base no lucro por ação e no valor patrimonial por ação.
+Método utilizado para estimar o preço justo de uma ação com base em indicadores fundamentalistas clássicos.
 
-#### Entradas
+#### Entradas principais
 
 - Ativo
-- LPA
-- VPA
+- LPA - Lucro por Ação
+- VPA - Valor Patrimonial por Ação
 
-#### Fórmula
+#### Fórmula base
 
 ```text
 Preço Justo = √(22.5 × LPA × VPA)
@@ -247,16 +275,16 @@ Preço Justo = √(22.5 × LPA × VPA)
 
 ### 2. Método Barsi
 
-Método focado em dividendos, usado para calcular o preço teto de uma ação considerando o dividendo anual e o dividend yield alvo.
+Método focado em dividendos, utilizado para calcular o preço teto com base no dividendo anual e no dividend yield alvo.
 
-#### Entradas
+#### Entradas principais
 
 - Ativo
 - Preço atual
 - Dividend yield alvo
 - Dividendos informados
 
-#### Lógica
+#### Lógica base
 
 ```text
 Dividendo Anual = soma dos dividendos informados
@@ -277,13 +305,13 @@ Margem = Preço Teto - Preço Atual
 
 Método voltado para estimar o preço teto com base no dividendo por ação e no dividend yield médio.
 
-#### Entradas
+#### Entradas principais
 
 - Ativo
-- DPA
+- DPA - Dividendo por Ação
 - Dividend yield médio
 
-#### Lógica
+#### Lógica base
 
 ```text
 Preço Teto = DPA / Dividend Yield Médio
@@ -291,14 +319,27 @@ Preço Teto = DPA / Dividend Yield Médio
 
 #### Saídas
 
-- Preço bruto
+- Preço bruto estimado
 - Preço teto ajustado
 
 ---
 
-## Simulação de Carteiras
+## Carteiras e Simulação
 
-O módulo de simulação consolida os ativos de uma carteira e calcula métricas financeiras com base em preços atuais, preço médio, quantidade e preço teto.
+O módulo de carteiras permite que o usuário autenticado organize ativos, quantidades, preços médios, preço teto manual e observações.
+
+A simulação consolida os ativos de uma carteira e calcula métricas financeiras com base em:
+
+- preço atual;
+- quantidade;
+- preço médio;
+- valor investido;
+- valor atual;
+- preço teto;
+- fonte do preço teto;
+- retorno estimado;
+- margem de segurança;
+- oportunidades.
 
 ### Fontes de preço teto
 
@@ -340,7 +381,7 @@ O sistema possui um serviço de alertas para verificar o preço atual dos ativos
 ### Como funciona
 
 1. O sistema busca os itens das carteiras dos usuários ativos.
-2. Atualiza a cotação do ativo via Yahoo Finance, se configurado para atualizar.
+2. Atualiza a cotação do ativo via Yahoo Finance, quando configurado para atualizar.
 3. Resolve o preço teto do item:
    - preço manual;
    - preço teto projetivo;
@@ -354,16 +395,18 @@ O sistema possui um serviço de alertas para verificar o preço atual dos ativos
 
 ### Tipos de evento
 
-- `below_or_equal_ceiling`: preço abaixo ou igual ao preço teto.
-- `above_ceiling`: preço acima do preço teto.
+| Tipo | Descrição |
+|---|---|
+| `below_or_equal_ceiling` | Preço abaixo ou igual ao preço teto |
+| `above_ceiling` | Preço acima do preço teto |
 
-### Endpoint para verificar alertas
+### Verificação manual de alertas
 
 ```http
 POST /api/portfolios/alert-events/check/
 ```
 
-### Exemplo de corpo da requisição
+#### Exemplo de corpo da requisição
 
 ```json
 {
@@ -373,23 +416,38 @@ POST /api/portfolios/alert-events/check/
 }
 ```
 
-### Comando de gerenciamento
+### Marcar alerta como lido
 
-Também é possível executar a verificação via terminal:
-
-```bash
-python manage.py check_price_alerts
+```http
+PATCH /api/portfolios/alert-events/{id}/mark-as-read/
 ```
 
-Com opções:
+---
 
-```bash
-python manage.py check_price_alerts --no-refresh
-python manage.py check_price_alerts --cooldown-hours 12
-python manage.py check_price_alerts --portfolio-id 1
-```
+## Dashboard
 
-Esse comando pode ser usado posteriormente em cronjob, agendador do servidor ou container para executar a rotina de forma periódica.
+O dashboard consolida os dados da carteira selecionada e apresenta uma visão rápida para tomada de decisão educacional.
+
+### Recursos do dashboard
+
+- Seleção de carteira.
+- KPIs consolidados.
+- Valor investido.
+- Valor atual.
+- Ganho ou perda não realizada.
+- Total de oportunidades.
+- Gráfico de alocação por ativo.
+- Gráfico de preço atual versus preço teto.
+- Lista de oportunidades.
+- Lista de alertas recentes.
+- Projeção de crescimento patrimonial com taxa anual simulada.
+- Botão para verificar alertas manualmente.
+
+### Bibliotecas utilizadas
+
+- Recharts para gráficos.
+- React para componentização.
+- Axios para integração com a API.
 
 ---
 
@@ -397,60 +455,61 @@ Esse comando pode ser usado posteriormente em cronjob, agendador do servidor ou 
 
 ### 1. Fluxo de autenticação
 
-1. O usuário acessa a tela de login.
-2. Envia usuário e senha.
-3. O backend valida as credenciais.
-4. O access token é retornado.
-5. O refresh token é controlado via cookie HTTP-only.
-6. O frontend carrega o usuário autenticado por `/api/auth/me/`.
-7. As rotas protegidas são liberadas.
-8. Caso o access token expire, o frontend tenta renová-lo.
+1. Usuário acessa `/login`.
+2. Envia credenciais.
+3. Backend valida os dados.
+4. Access token é retornado.
+5. Refresh token é gerenciado em cookie HTTP-only.
+6. Frontend mantém a sessão autenticada.
+7. Perfil do usuário é carregado via `/api/auth/me/`.
+8. Rotas internas passam a ficar disponíveis.
 
 ---
 
 ### 2. Fluxo de valuation
 
-1. O usuário escolhe o método de cálculo.
-2. Seleciona ou informa o ativo.
-3. Preenche os indicadores necessários.
-4. O frontend envia os dados para a API.
-5. O backend executa o cálculo.
-6. A análise é persistida no banco.
-7. O resultado é retornado para o frontend.
-8. O histórico fica disponível para consulta.
+1. Usuário escolhe um método de cálculo.
+2. Seleciona ou informa um ativo.
+3. Preenche os dados necessários.
+4. Frontend envia os dados para a API.
+5. Backend executa o cálculo.
+6. Backend persiste a análise.
+7. Resultado é retornado para a interface.
+8. A análise fica disponível no histórico.
 
 ---
 
-### 3. Fluxo de carteira
+### 3. Fluxo de carteiras
 
-1. O usuário autenticado cria uma carteira.
+1. Usuário autenticado cria uma carteira.
 2. Adiciona ativos à carteira.
-3. Informa quantidade, preço médio e observações.
-4. Pode definir preço teto manual.
-5. Pode cadastrar alertas manuais por item.
-6. O sistema calcula os totais da carteira.
+3. Informa quantidade e preço médio.
+4. Define opcionalmente um preço teto manual.
+5. Cria alertas manuais por ativo.
+6. Backend salva os dados vinculados ao usuário.
+7. Frontend exibe posição, métricas e simulação.
 
 ---
 
 ### 4. Fluxo de simulação
 
-1. O usuário acessa a simulação de uma carteira.
-2. O backend busca todos os itens da carteira.
-3. O sistema resolve o preço teto de cada ativo.
-4. Calcula métricas individuais e consolidadas.
-5. Retorna resumo da carteira e lista de ativos simulados.
+1. Sistema busca os itens da carteira.
+2. Resolve a melhor referência de preço teto.
+3. Calcula métricas por ativo.
+4. Consolida o resumo da carteira.
+5. Identifica oportunidades.
+6. Exibe os dados em cards, tabelas e gráficos.
 
 ---
 
 ### 5. Fluxo de alertas automáticos
 
-1. A rotina de alertas é executada via API ou comando.
-2. O sistema atualiza cotações, quando habilitado.
-3. Compara preço atual com preço teto.
-4. Gera eventos de alerta.
-5. Evita duplicidade por cooldown.
-6. O usuário consulta os eventos no frontend.
-7. O usuário pode marcar alertas como lidos.
+1. Usuário acessa a tela de alertas ou o dashboard.
+2. Aciona a verificação manual ou aguarda rotina periódica.
+3. Sistema compara preço atual e preço teto.
+4. Eventos de alerta são criados.
+5. Usuário acompanha alertas novos e lidos.
+6. Usuário pode marcar alertas como lidos.
 
 ---
 
@@ -551,6 +610,7 @@ PATCH /api/portfolios/alert-events/{id}/mark-as-read/
 - Autenticação via JWT.
 - Access token.
 - Refresh token.
+- Refresh token com cookie HTTP-only.
 
 ### Assets
 
@@ -609,22 +669,25 @@ InvestSmart/
 │   ├── public/
 │   ├── src/
 │   │   ├── app/
+│   │   │   └── routes.jsx
 │   │   ├── assets/
 │   │   ├── components/
 │   │   ├── contexts/
 │   │   ├── pages/
+│   │   │   ├── AlertEventsPage.jsx
 │   │   │   ├── BarsiPage.jsx
+│   │   │   ├── DashboardPage.jsx
 │   │   │   ├── GrahamPage.jsx
 │   │   │   ├── HomePage.jsx
 │   │   │   ├── LoginPage.jsx
+│   │   │   ├── PortfolioSimulatorPage.jsx
 │   │   │   ├── PortfoliosPage.jsx
 │   │   │   └── ProjectedPage.jsx
-│   │   └── services/
-│   │       ├── assetsApi.js
-│   │       ├── authApi.jsx
-│   │       ├── http.js
-│   │       ├── portfoliosApi.js
-│   │       └── valuationApi.js
+│   │   ├── services/
+│   │   ├── test/
+│   │   └── styles.css
+│   ├── coverage/
+│   │   └── lcov.info
 │   ├── package.json
 │   └── vite.config.js
 ├── .env.example
@@ -638,7 +701,7 @@ InvestSmart/
 
 ## Rotas do Frontend
 
-### Públicas
+### Pública
 
 ```text
 /login
@@ -649,9 +712,10 @@ InvestSmart/
 ```text
 /
  /graham
- /barsi
  /projected
+ /barsi
  /portfolios
+ /alerts
 ```
 
 ---
@@ -660,7 +724,7 @@ InvestSmart/
 
 Crie um arquivo `.env` na raiz do projeto.
 
-### Backend
+### Exemplo base
 
 ```env
 POSTGRES_DB=investsmart
@@ -668,22 +732,24 @@ POSTGRES_USER=investsmart_user
 POSTGRES_PASSWORD=investsmart_pass
 POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
-
 SECRET_KEY_DJANGO=your_secret_key
 DEBUG=True
+```
 
+### Recomendado para desenvolvimento local com frontend separado
+
+```env
 ALLOWED_HOSTS=127.0.0.1,localhost
 CORS_ALLOWED_ORIGINS=http://127.0.0.1:5173,http://localhost:5173
 CSRF_TRUSTED_ORIGINS=http://127.0.0.1:5173,http://localhost:5173
-
 AUTH_COOKIE_SECURE=False
 AUTH_COOKIE_SAMESITE=Lax
 AUTH_COOKIE_DOMAIN=
 ```
 
-### Frontend
+### Variável opcional do frontend
 
-Crie um arquivo `.env` dentro de `frontend/`, se quiser configurar a URL da API explicitamente:
+Crie um arquivo `.env` dentro de `frontend/`, caso deseje definir explicitamente a URL base da API.
 
 ```env
 VITE_API_BASE_URL=http://127.0.0.1:8000/api
@@ -700,8 +766,6 @@ git clone https://github.com/LucasCarvalhoSteffens/InvestSmart.git
 cd InvestSmart
 ```
 
----
-
 ### 2. Criar e ativar o ambiente virtual
 
 #### Windows
@@ -711,14 +775,12 @@ python -m venv venv
 venv\Scripts\activate
 ```
 
-#### Linux/macOS
+#### Linux / macOS
 
 ```bash
 python -m venv venv
 source venv/bin/activate
 ```
-
----
 
 ### 3. Instalar as dependências do backend
 
@@ -726,15 +788,11 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
----
-
 ### 4. Subir o banco de dados com Docker
 
 ```bash
 docker compose up -d
 ```
-
----
 
 ### 5. Aplicar as migrations
 
@@ -744,15 +802,11 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 
----
-
-### 6. Criar superusuário
+### 6. Criar um superusuário
 
 ```bash
 python manage.py createsuperuser
 ```
-
----
 
 ### 7. Subir o backend
 
@@ -768,14 +822,6 @@ Backend disponível em:
 http://127.0.0.1:8000
 ```
 
-Admin disponível em:
-
-```text
-http://127.0.0.1:8000/admin/
-```
-
----
-
 ### 8. Instalar as dependências do frontend
 
 Em outro terminal:
@@ -784,8 +830,6 @@ Em outro terminal:
 cd frontend
 npm install
 ```
-
----
 
 ### 9. Rodar o frontend
 
@@ -803,227 +847,253 @@ http://localhost:5173
 
 ## Como Testar
 
-### Rodar todos os testes
+### Fluxo mínimo recomendado para validação manual
 
-A partir da pasta `backend/`:
+1. Iniciar backend e frontend.
+2. Criar ou utilizar um usuário válido.
+3. Fazer login no sistema.
+4. Validar restauração da sessão.
+5. Validar carregamento do usuário autenticado.
+6. Garantir que existam ativos cadastrados.
+7. Acessar as páginas de valuation.
+8. Executar cálculos de Graham, Barsi e Projetivo.
+9. Validar se os resultados são exibidos corretamente.
+10. Conferir se as análises foram persistidas.
+11. Criar uma carteira.
+12. Adicionar ativos à carteira.
+13. Definir preço teto manual ou utilizar análises existentes.
+14. Executar a simulação.
+15. Criar alertas por ativo.
+16. Acessar a tela de alertas.
+17. Executar a verificação de alertas.
+18. Validar dashboard, gráficos, KPIs e oportunidades.
 
-```bash
-python manage.py test --settings=config.settings_test
+### Acesso ao Admin
+
+```text
+http://127.0.0.1:8000/admin/
 ```
 
-### Rodar testes com coverage
+---
+
+## Testes Automatizados
+
+O backend possui configuração específica para testes com `settings_test.py`.
+
+### Rodar testes do backend
 
 ```bash
-coverage run manage.py test --settings=config.settings_test
-coverage report
-coverage xml -o coverage.xml
+cd backend
+python manage.py test --settings=config.settings_test
 ```
 
 ### Rodar testes específicos
 
 ```bash
-python manage.py test apps.accounts.tests --settings=config.settings_test
-python manage.py test apps.assets.tests --settings=config.settings_test
-python manage.py test apps.valuation.tests --settings=config.settings_test
-python manage.py test apps.portfolios.tests --settings=config.settings_test
+cd backend
+python manage.py test apps.accounts.tests apps.assets.tests apps.valuation.tests apps.portfolios.tests --settings=config.settings_test --verbosity 2
 ```
+
+### Rodar com coverage
+
+```bash
+cd backend
+coverage run manage.py test --settings=config.settings_test
+coverage report
+coverage xml -o coverage.xml
+```
+
+### Rodar testes do frontend
+
+```bash
+cd frontend
+npm test
+```
+
+### Rodar testes do frontend com cobertura
+
+```bash
+cd frontend
+npm run coverage
+```
+
+### Ambiente de testes
+
+O ambiente de testes utiliza:
+
+- SQLite em memória no backend;
+- hasher simplificado para senhas;
+- configurações específicas em `settings_test.py`;
+- isolamento do banco principal;
+- ajustes de segurança adequados para execução automatizada;
+- Vitest para testes unitários do frontend;
+- Testing Library para validação de componentes React.
 
 ---
 
-## Fluxo Mínimo de Validação Manual
+## Cobertura de Testes
 
-1. Subir o PostgreSQL com Docker.
-2. Subir o backend.
-3. Subir o frontend.
-4. Criar um superusuário.
-5. Cadastrar ativos no Admin ou via API.
-6. Acessar o frontend.
-7. Realizar login.
-8. Executar cálculos Graham, Barsi e Projetivo.
-9. Validar se as análises foram persistidas.
-10. Criar uma carteira.
-11. Adicionar itens à carteira.
-12. Executar a simulação da carteira.
-13. Criar alertas por item.
-14. Executar a verificação de alertas.
-15. Consultar eventos de alerta.
-16. Marcar eventos como lidos.
+O projeto utiliza duas estratégias de validação de cobertura, separando backend e frontend conforme as ferramentas utilizadas no pipeline de qualidade.
+
+### Backend
+
+A cobertura do backend é analisada pelo SonarCloud a partir do relatório gerado em:
+
+```text
+backend/coverage.xml
+```
+
+Esse relatório é produzido durante a execução dos testes automatizados com `coverage.py` e enviado ao SonarCloud pelo workflow do GitHub Actions.
+
+### Frontend
+
+A cobertura do frontend é validada diretamente no CI com Vitest, gerando o relatório em:
+
+```text
+frontend/coverage/lcov.info
+```
+
+Os limites mínimos de cobertura do frontend são definidos no arquivo:
+
+```text
+frontend/vite.config.js
+```
+
+### Justificativa da separação
+
+Essa separação foi adotada porque o SonarCloud Free utiliza o Quality Gate padrão **Sonar way**, que considera cobertura mínima de **80% em código novo**.
+
+No entanto, os critérios acadêmicos do projeto exigem metas específicas por camada:
+
+| Camada | Meta mínima de cobertura |
+|---|---:|
+| Backend | 75% |
+| Frontend | 25% |
+
+Dessa forma, o backend permanece integrado à análise do SonarCloud, enquanto o frontend é validado no pipeline por meio do Vitest e dos thresholds configurados no `vite.config.js`.
 
 ---
 
 ## Qualidade de Código
 
-O projeto utiliza SonarCloud para análise contínua de qualidade, segurança e cobertura.
+O projeto possui integração com SonarCloud e workflow no GitHub Actions.
 
-### Cobertura de Testes
+### Configuração atual
 
-O projeto utiliza duas estratégias de validação de cobertura:
+- Project Key: `LucasCarvalhoSteffens_InvestSmart`
+- Organization: `lucascarvalhosteffens`
+- Workflow: `.github/workflows/sonar.yml`
+- Arquivo de configuração: `sonar-project.properties`
+- Pipeline com:
+  - instalação de dependências;
+  - execução de testes do backend;
+  - execução de testes do frontend;
+  - geração de coverage do backend;
+  - geração de coverage do frontend;
+  - análise no SonarCloud;
+  - validação de thresholds mínimos do frontend no Vitest.
 
-- **Backend:** cobertura analisada pelo SonarCloud a partir do relatório `backend/coverage.xml`.
-- **Frontend:** cobertura validada no CI com Vitest, gerando `frontend/coverage/lcov.info` e aplicando thresholds mínimos no `vite.config.js`.
+### Comando usado no pipeline para backend
 
-Essa separação foi adotada porque o SonarCloud Free utiliza o Quality Gate padrão `Sonar way`, com cobertura mínima de 80% em código novo, enquanto os critérios acadêmicos do projeto exigem 25% para frontend e 75% para backend.
-
-### Configuração
-
-```text
-Project Key: LucasCarvalhoSteffens_InvestSmart
-Organization: lucascarvalhosteffens
+```bash
+coverage run backend/manage.py test apps.accounts.tests apps.assets.tests apps.valuation.tests apps.portfolios.tests --settings=config.settings_test --verbosity 2
+coverage xml -o backend/coverage.xml
+coverage report -m
 ```
 
-### Métricas acompanhadas
+### Comando usado no pipeline para frontend
 
-- Quality Gate
-- Bugs
-- Vulnerabilities
-- Code Smells
-- Coverage
-- Duplicated Lines
-
-### Pipeline
-
-O workflow do GitHub Actions executa:
-
-1. Checkout do repositório.
-2. Configuração do Python.
-3. Instalação das dependências.
-4. Execução dos testes.
-5. Geração do relatório de coverage.
-6. Envio da análise para o SonarCloud.
+```bash
+cd frontend
+npm ci
+npm run coverage
+```
 
 ---
 
 ## Segurança
 
-O projeto aplica práticas básicas de segurança para aplicações web:
+O projeto aplica práticas básicas de segurança para aplicações web modernas.
 
-- Autenticação com JWT.
-- Refresh token via cookie HTTP-only.
-- Proteção de rotas no frontend.
-- Separação de variáveis sensíveis em `.env`.
-- Uso de CORS e CSRF configuráveis por ambiente.
+### Recursos implementados
+
+- Autenticação baseada em JWT.
+- Access token com tempo de vida reduzido.
+- Refresh token com rotação.
+- Blacklist de refresh token após rotação.
+- Refresh token em cookie HTTP-only.
+- Rotas protegidas no frontend.
+- Proteção padrão das APIs com autenticação.
+- Uso de variáveis de ambiente para dados sensíveis.
+- Configurações de CORS e CSRF por ambiente.
+- Senhas armazenadas com os mecanismos seguros do Django.
 - Uso do ORM do Django para reduzir risco de SQL Injection.
-- Controle de acesso por usuário nas carteiras.
-- Validação de entradas nos serializers.
-- Isolamento entre ambiente de desenvolvimento e ambiente de testes.
+- Configurações de segurança para produção quando `DEBUG=False`.
 
----
+### Aviso de uso
 
-## Integração com Dados de Mercado
-
-O projeto possui integração com Yahoo Finance por meio da biblioteca `yfinance`.
-
-### Dados tratados
-
-- Ticker normalizado.
-- Nome do ativo.
-- Setor.
-- Preço atual.
-- Moeda.
-- LPA.
-- VPA.
-- Dividendo anual.
-- Dividend yield.
-- Payout ratio.
-- Quantidade de ações.
-- Dividendos dos últimos 12 meses.
-
-### Estratégias utilizadas
-
-- Cache de dados por período definido.
-- Tentativas automáticas em caso de falha.
-- Fallback com dados já persistidos.
-- Persistência dos dividendos no banco.
-
----
-
-## Contexto Acadêmico
-
-O InvestSmart foi desenvolvido para a disciplina de Portfólio em Engenharia de Software.
-
-O projeto busca atender critérios técnicos como:
-
-- repositório público no GitHub;
-- histórico de commits;
-- arquitetura definida;
-- documentação técnica;
-- funcionalidades reais;
-- interface navegável;
-- persistência em banco relacional;
-- autenticação;
-- testes automatizados;
-- CI/CD;
-- análise estática de código;
-- preparação para deploy público;
-- demonstração funcional para Poster + Demo Day.
-
----
-
-## Status Atual
-
-### Consolidado na branch `main`
-
-- Backend Django REST Framework.
-- Frontend React/Vite.
-- Autenticação JWT.
-- Refresh token.
-- Recuperação do usuário autenticado.
-- CRUD de ativos.
-- Integração com Yahoo Finance.
-- Cálculos Graham, Barsi e Projetivo.
-- Histórico de análises.
-- Carteiras por usuário.
-- Itens de carteira.
-- Alertas por item.
-- Eventos de alerta automático.
-- Simulação consolidada de carteira.
-- Comando `check_price_alerts`.
-- Testes automatizados.
-- SonarCloud configurado.
-
-### Em evolução
-
-- Refinamento visual do frontend.
-- Dashboard com gráficos.
-- Melhorias de UX nas carteiras.
-- Exibição mais completa dos eventos de alerta.
-- Agendamento periódico real da rotina de alertas em ambiente produtivo.
-- Deploy final em nuvem.
-- Observabilidade em produção.
-- Ampliação da cobertura de testes no frontend.
+O InvestSmart não realiza ordens de compra ou venda, não se conecta a corretoras e não substitui análise profissional. A aplicação é voltada para estudo, simulação e apoio educacional em análise fundamentalista.
 
 ---
 
 ## Roadmap
 
-- [x] Estruturar backend Django.
-- [x] Criar frontend React.
-- [x] Implementar autenticação JWT.
-- [x] Implementar refresh token.
-- [x] Criar rotas protegidas.
-- [x] Criar CRUD de ativos.
-- [x] Implementar método Graham.
-- [x] Implementar método Barsi.
-- [x] Implementar método Projetivo.
-- [x] Persistir análises.
-- [x] Criar histórico de análises.
-- [x] Criar módulo de carteiras.
-- [x] Criar itens de carteira.
-- [x] Criar simulação de carteira.
-- [x] Criar alertas de preço.
-- [x] Criar eventos de alerta automático.
-- [x] Criar comando para rotina de alertas.
-- [x] Integrar Yahoo Finance.
-- [x] Configurar SonarCloud.
-- [ ] Melhorar interface de carteiras.
-- [ ] Criar dashboards de dividendos e valuation.
-- [ ] Adicionar gráficos no frontend.
-- [ ] Criar rotina agendada em produção.
-- [ ] Finalizar deploy público.
-- [ ] Documentar arquitetura com diagrama C4.
-- [ ] Documentar instruções finais de deploy.
-- [ ] Ampliar testes de integração.
-- [ ] Adicionar observabilidade.
+### Concluído ou em funcionamento
+
+- Estrutura backend com Django REST Framework.
+- Estrutura frontend com React e Vite.
+- Autenticação JWT.
+- Refresh token com cookie HTTP-only.
+- Rotas protegidas.
+- CRUD de ativos.
+- Integração com Yahoo Finance.
+- Métodos de valuation:
+  - Graham;
+  - Barsi;
+  - Projetivo.
+- Histórico de análises.
+- CRUD de carteiras.
+- CRUD de itens de carteira.
+- Alertas manuais por item.
+- Simulação consolidada de carteira.
+- Eventos de alerta automático.
+- Tela de alertas automáticos.
+- Dashboard com gráficos e KPIs.
+- Pipeline SonarCloud.
+- Testes automatizados no backend.
+- Testes automatizados no frontend.
+- Validação separada de cobertura para backend e frontend.
+
+### Em evolução
+
+- Melhorias de UI/UX e responsividade.
+- Refinamento visual dos dashboards.
+- Ampliação dos testes de integração.
+- Documentação complementar de arquitetura.
+- Deploy público.
+- Observabilidade em ambiente produtivo.
+- Validação com usuários reais.
+- Poster + Demo Day.
+
+---
+
+## Contexto Acadêmico
+
+Este projeto foi desenvolvido para a disciplina de Portfólio do curso de Engenharia de Software.
+
+A proposta atende à linha de **Web Apps**, contemplando:
+
+- aplicação web navegável;
+- frontend e backend próprios;
+- arquitetura client-server;
+- persistência real com banco relacional;
+- integração com API externa;
+- autenticação;
+- testes automatizados;
+- CI/CD;
+- análise estática de qualidade;
+- documentação técnica;
+- evolução incremental por branches e pull requests.
 
 ---
 
@@ -1031,5 +1101,9 @@ O projeto busca atender critérios técnicos como:
 
 **Lucas de Carvalho Steffens**
 
-- GitHub: [LucasCarvalhoSteffens](https://github.com/LucasCarvalhoSteffens)
-- Projeto: [InvestSmart](https://github.com/LucasCarvalhoSteffens/InvestSmart)
+Projeto de Portfólio  
+Engenharia de Software  
+Católica de Santa Catarina
+
+GitHub: https://github.com/LucasCarvalhoSteffens  
+Repositório: https://github.com/LucasCarvalhoSteffens/InvestSmart
