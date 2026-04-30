@@ -1,4 +1,4 @@
-import AssetSearchInput from "./AssetSearchInput";
+import AssetAutocomplete from "./AssetAutocomplete";
 
 export default function PortfolioItemForm({
   portfolioSelected,
@@ -11,75 +11,111 @@ export default function PortfolioItemForm({
   editing,
 }) {
   return (
-    <div className="form-card">
-      <h3>{editing ? "Editar item da carteira" : "Adicionar ativo"}</h3>
+    <div className="card portfolio-form-card">
+      <div className="form-header">
+        <div>
+          <h3 className="section-title">
+            {editing ? "Editar ativo da carteira" : "Adicionar ativo"}
+          </h3>
+          <p className="muted">
+            Pesquise um ativo, informe sua posição e defina um preço teto para acompanhamento.
+          </p>
+        </div>
+
+        {editing && <span className="status-pill status-idle">Edição</span>}
+      </div>
 
       {!portfolioSelected ? (
-        <p>Selecione uma carteira para cadastrar ativos.</p>
+        <div className="empty-state compact">
+          <strong>Nenhuma carteira selecionada</strong>
+          <span>Selecione ou crie uma carteira antes de adicionar ativos.</span>
+        </div>
       ) : (
-        <form onSubmit={onSubmit}>
-          <AssetSearchInput
-          value={form.ticker}
-          onChange={onAssetChange}
-          disabled={submitting}
+        <form className="form friendly-form" onSubmit={onSubmit}>
+          <AssetAutocomplete
+            value={form.ticker}
+            onChange={onAssetChange}
+            label="Ativo"
+            placeholder="Digite o ticker. Ex: PETR4, BBAS3, VALE3"
+            disabled={submitting}
           />
 
-          <label>
-            Quantidade
-            <input
-              type="number"
-              name="quantity"
-              value={form.quantity}
-              onChange={onTextChange}
-              min="1"
-              required
-            />
-          </label>
+          <div className="form-grid two-columns">
+            <div className="form-group">
+              <label htmlFor="quantity">Quantidade</label>
+              <input
+                id="quantity"
+                type="number"
+                name="quantity"
+                value={form.quantity}
+                onChange={onTextChange}
+                min="1"
+                placeholder="Ex.: 10"
+                required
+              />
+              <small className="field-hint">Quantidade de ações na posição.</small>
+            </div>
 
-          <label>
-            Preço médio
-            <input
-              type="number"
-              name="average_price"
-              value={form.average_price}
-              onChange={onTextChange}
-              min="0.01"
-              step="0.01"
-              required
-            />
-          </label>
+            <div className="form-group">
+              <label htmlFor="average_price">Preço médio</label>
+              <input
+                id="average_price"
+                type="number"
+                name="average_price"
+                value={form.average_price}
+                onChange={onTextChange}
+                min="0.01"
+                step="0.01"
+                placeholder="Ex.: 24.50"
+                required
+              />
+              <small className="field-hint">Valor médio pago por ação.</small>
+            </div>
 
-          <label>
-            Preço teto
-            <input
-              type="number"
-              name="target_price"
-              value={form.target_price}
-              onChange={onTextChange}
-              min="0.01"
-              step="0.01"
-            />
-          </label>
+            <div className="form-group">
+              <label htmlFor="target_price">Preço teto</label>
+              <input
+                id="target_price"
+                type="number"
+                name="target_price"
+                value={form.target_price}
+                onChange={onTextChange}
+                min="0.01"
+                step="0.01"
+                placeholder="Ex.: 30.00"
+              />
+              <small className="field-hint">
+                Opcional. Usado para alertas e análise de oportunidade.
+              </small>
+            </div>
 
-          <label>
-            Observações
-            <textarea
-              name="notes"
-              value={form.notes}
-              onChange={onTextChange}
-            />
-          </label>
+            <div className="form-group">
+              <label htmlFor="notes">Observações</label>
+              <textarea
+                id="notes"
+                name="notes"
+                value={form.notes}
+                onChange={onTextChange}
+                placeholder="Ex.: posição de longo prazo, foco em dividendos..."
+              />
+            </div>
+          </div>
 
-          <div className="button-row">
-            <button className="primary-btn full-width" type="submit" disabled={submitting}>
-              {submitting ? "Salvando..." : editing ? "Atualizar item" : "Adicionar item"}
+          <div className="button-row form-actions">
+            <button className="primary-btn" type="submit" disabled={submitting}>
+              {submitting
+                ? "Salvando..."
+                : editing
+                  ? "Atualizar ativo"
+                  : "Adicionar à carteira"}
             </button>
 
             {editing && (
               <button
-                className="secondary-btn full-width"
+                className="secondary-btn"
                 type="button"
                 onClick={onCancel}
+                disabled={submitting}
               >
                 Cancelar edição
               </button>

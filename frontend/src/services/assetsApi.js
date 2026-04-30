@@ -1,12 +1,23 @@
 import http from "./http";
 
-export async function listAssets(access) {
-  const { data } = await http.get("/assets/", {
-    headers: {
-      Authorization: `Bearer ${access}`,
-    },
-  });
+function buildAuthConfig(access, params) {
+  const config = {};
 
+  if (access) {
+    config.headers = {
+      Authorization: `Bearer ${access}`,
+    };
+  }
+
+  if (params) {
+    config.params = params;
+  }
+
+  return config;
+}
+
+export async function listAssets(access) {
+  const { data } = await http.get("/assets/", buildAuthConfig(access));
   return data;
 }
 
@@ -15,14 +26,25 @@ export async function searchAssets(query, access) {
     return [];
   }
 
-  const { data } = await http.get("/assets/search/", {
-    params: {
+  const { data } = await http.get(
+    "/assets/search/",
+    buildAuthConfig(access, {
       q: query.trim(),
+    }),
+  );
+
+  return data;
+}
+
+export async function syncAssetByTicker(ticker, access, forceRefresh = false) {
+  const { data } = await http.post(
+    "/assets/sync/",
+    {
+      ticker,
+      force_refresh: forceRefresh,
     },
-    headers: {
-      Authorization: `Bearer ${access}`,
-    },
-  });
+    buildAuthConfig(access),
+  );
 
   return data;
 }

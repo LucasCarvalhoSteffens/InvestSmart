@@ -1,129 +1,227 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { searchAssets } from "../services/assetsApi";
+
+function cleanTicker(value) {
+  if (!value) {
+    return "";
+  }
+
+  return String(value)
+    .trim()
+    .split(" - ")[0]
+    .split(" ")[0]
+    .toUpperCase();
+}
 
 export default function AssetAutocomplete({
   value,
   onChange,
   onAssetSelected,
   label = "Ativo",
-  placeholder = "Digite parte do ticker. Ex: PET, BBA, VALE",
+  placeholder = "Digite o ticker do ativo",
+  disabled = false,
 }) {
   const { accessToken } = useAuth();
+  const wrapperRef = useRef(null);
 
   const [query, setQuery] = useState(value || "");
-  const [suggestions, setSuggestions] = useState([]);
+  const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
 
-  const debounceRef = useRef(null);
+  const normalizedQuery = useMemo(() => cleanTicker(query), [query]);
 
   useEffect(() => {
     setQuery(value || "");
   }, [value]);
 
   useEffect(() => {
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
+    function handleClickOutside(event) {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        setOpen(false);
+        setHighlightedIndex(-1);
+      }
     }
 
-    const normalizedQuery = query.trim();
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-    if (normalizedQuery.length < 2) {
-      setSuggestions([]);
-      setShowSuggestions(false);
+  useEffect(() => {
+    if (!accessToken || normalizedQuery.length < 2) {
+      setResults([]);
+      setOpen(false);
       return;
     }
 
-    debounceRef.current = setTimeout(async () => {
+    const timeoutId = setTimeout(async () => {
       try {
         setLoading(true);
         setError("");
 
         const data = await searchAssets(normalizedQuery, accessToken);
-        setSuggestions(Array.isArray(data) ? data : []);
-        setShowSuggestions(true);
+        const items = Array.isArray(data) ? data : [];
+
+        setResults(items);
+        setOpen(true);
+        setHighlightedIndex(items.length > 0 ? 0 : -1);
       } catch {
-        setSuggestions([]);
-        setError("Não foi possível buscar ativos.");
+        setError("Não foi possível buscar ativos no momento.");
+        setResults([]);
+        setOpen(true);
       } finally {
         setLoading(false);
       }
-    }, 400);
+    }, 300);
 
-    return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
-    };
-  }, [query, accessToken]);
+    return () => clearTimeout(timeoutId);
+  }, [normalizedQuery, accessToken]);
 
   function handleInputChange(event) {
-    const nextValue = event.target.value.toUpperCase();
+    const newValue = event.target.value;
 
-    setQuery(nextValue);
-    setError("");
+    setQuery(newValue);
+    onChange(cleanTicker(newValue));
+    onAssetSelected?.(null);
+    setOpen(true);
+  }
 
-    if (onChange) {
-      onChange(nextValue);
+  function handleSelect(asset) {
+    const ticker = cleanTicker(asset.ticker);
+    const displayValue = `${ticker} - ${asset.name || "Ativo"}`;
+
+    setQuery(displayValue);
+    setOpen(false);
+    setHighlightedIndex(-1);
+
+    onChange(ticker);
+    onAssetSelected?.(asset);
+  }
+
+  function handleKeyDown(event) {
+    if (!open || results.length === 0) {
+      return;
+    }
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setHighlightedIndex((prev) => (prev < results.length - 1 ? prev + 1 : 0));
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : results.length - 1));
+    }
+
+    if (event.key === "Enter" && highlightedIndex >= 0) {
+      event.preventDefault();
+      handleSelect(results[highlightedIndex]);
+    }
+
+    if (event.key === "Escape") {
+      setOpen(false);
+      setHighlightedIndex(-1);
     }
   }
 
-  function handleSelectAsset(asset) {
-    setQuery(asset.ticker);
-    setSuggestions([]);
-    setShowSuggestions(false);
+  function handleClear() {
+    setQuery("");
+    setResults([]);
     setError("");
-
-    if (onChange) {
-      onChange(asset.ticker);
-    }
-
-    if (onAssetSelected) {
-      onAssetSelected(asset);
-    }
+    setOpen(false);
+    setHighlightedIndex(-1);
+    onChange("");
+    onAssetSelected?.(null);
   }
 
   return (
-    <div className="form-group asset-autocomplete">
-      <label>{label}</label>
+    <div className="asset-autocomplete" ref={wrapperRef}>
+      <label htmlFor="asset-autocomplete-input" className="autocomplete-label">
+        {label}
+      </label>
 
       <div className="autocomplete-wrapper">
         <input
+          id="asset-autocomplete-input"
           type="text"
           value={query}
+          placeholder={placeholder}
+          disabled={disabled}
+          autoComplete="off"
           onChange={handleInputChange}
           onFocus={() => {
-            if (suggestions.length > 0) {
-              setShowSuggestions(true);
+            if (results.length > 0 || error) {
+              setOpen(true);
             }
           }}
-          placeholder={placeholder}
-          autoComplete="off"
+          onKeyDown={handleKeyDown}
         />
 
-        {loading && <small>Buscando ativos...</small>}
-
-        {showSuggestions && suggestions.length > 0 && (
-          <div className="autocomplete-list">
-            {suggestions.map((asset) => (
-              <button
-                type="button"
-                key={asset.ticker}
-                className="autocomplete-item"
-                onClick={() => handleSelectAsset(asset)}
-              >
-                <strong>{asset.ticker}</strong>
-                <span>{asset.name}</span>
-                <small>{asset.source}</small>
-              </button>
-            ))}
-          </div>
+        {query && (
+          <button
+            type="button"
+            className="autocomplete-clear-btn"
+            onClick={handleClear}
+            aria-label="Limpar busca"
+          >
+            ×
+          </button>
         )}
       </div>
 
-      {error && <p className="error-text">{error}</p>}
+      <small className="autocomplete-hint">
+        Digite o ticker ou parte do nome da empresa. Ex.: PETR4, BBAS3, VALE3
+      </small>
+
+      {open && (
+        <div className="autocomplete-results">
+          {loading && <div className="autocomplete-state">Buscando ativos...</div>}
+
+          {!loading && error && (
+            <div className="autocomplete-state autocomplete-state-error">{error}</div>
+          )}
+
+          {!loading && !error && results.length === 0 && normalizedQuery.length >= 2 && (
+            <div className="autocomplete-state">
+              Nenhum ativo encontrado para "{normalizedQuery}".
+            </div>
+          )}
+
+          {!loading &&
+            !error &&
+            results.map((asset, index) => {
+              const isActive = index === highlightedIndex;
+
+              return (
+                <button
+                  key={`${asset.ticker}-${index}`}
+                  type="button"
+                  className={`autocomplete-option ${isActive ? "active" : ""}`}
+                  onMouseEnter={() => setHighlightedIndex(index)}
+                  onClick={() => handleSelect(asset)}
+                >
+                  <div className="autocomplete-option-main">
+                    <div className="autocomplete-option-top">
+                      <strong>{asset.ticker}</strong>
+                      {asset.source && (
+                        <span className="autocomplete-source-badge">{asset.source}</span>
+                      )}
+                    </div>
+
+                    <span className="autocomplete-option-name">
+                      {asset.name || "Nome não informado"}
+                    </span>
+                  </div>
+
+                  <span className="autocomplete-option-action">Selecionar</span>
+                </button>
+              );
+            })}
+        </div>
+      )}
     </div>
   );
 }
