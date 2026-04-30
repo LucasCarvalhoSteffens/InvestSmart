@@ -77,16 +77,12 @@ http.interceptors.response.use(
 
     originalRequest._retry = true;
 
-    try {
-      const newToken = await refreshAccessToken();
+    const newToken = await refreshAccessToken();
 
-      originalRequest.headers = originalRequest.headers ?? {};
-      originalRequest.headers.Authorization = `Bearer ${newToken}`;
+    originalRequest.headers = originalRequest.headers ?? {};
+    originalRequest.headers.Authorization = `Bearer ${newToken}`;
 
-      return http(originalRequest);
-    } catch (refreshError) {
-      throw refreshError;
-    }
+    return http(originalRequest);
   }
 );
 

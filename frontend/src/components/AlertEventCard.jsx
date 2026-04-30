@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 function formatCurrency(value) {
   const numericValue = Number(value ?? 0);
 
@@ -66,6 +68,29 @@ function getInitials(ticker) {
 
   return String(ticker).slice(0, 2).toUpperCase();
 }
+
+AlertEventCard.propTypes = {
+  alert: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+    event_type: PropTypes.string,
+    asset_ticker: PropTypes.string,
+    asset_name: PropTypes.string,
+    portfolio_name: PropTypes.string,
+    is_read: PropTypes.bool,
+    created_at: PropTypes.string,
+    current_price: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.number
+    ]),
+    price_ceiling: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.number
+    ]),
+    price_ceiling_source: PropTypes.string,
+    message: PropTypes.string
+  }).isRequired,
+  onMarkAsRead: PropTypes.func
+};
 
 export default function AlertEventCard({ alert, onMarkAsRead, markingAsRead }) {
   const alertClassName = getAlertClassName(alert.event_type);
