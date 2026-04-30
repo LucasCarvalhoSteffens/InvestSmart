@@ -24,7 +24,7 @@ jobs:
           fetch-depth: 0
 
       # =========================
-      # Backend - Python/Django
+      # Backend
       # =========================
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -53,7 +53,7 @@ jobs:
           coverage report -m
 
       # =========================
-      # Frontend - React/Vite
+      # Frontend
       # =========================
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -71,22 +71,16 @@ jobs:
         run: npm run test:coverage
 
       # =========================
-      # Debug dos arquivos de cobertura
+      # Debug
       # =========================
       - name: Debug coverage files
         run: |
-          echo "Checking backend coverage..."
           test -f backend/coverage.xml && echo "backend/coverage.xml found"
-
-          echo "Checking frontend coverage..."
           test -f frontend/coverage/lcov.info && echo "frontend/coverage/lcov.info found"
-
-          echo "Coverage files:"
-          ls -la backend || true
-          ls -la frontend/coverage || true
+          echo "Frontend coverage is generated and validated by Vitest, but excluded from SonarCloud coverage gate."
 
       # =========================
-      # SonarCloud Scan
+      # SonarCloud
       # =========================
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v6
