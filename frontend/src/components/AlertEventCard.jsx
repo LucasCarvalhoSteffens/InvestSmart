@@ -87,9 +87,10 @@ AlertEventCard.propTypes = {
       PropTypes.number
     ]),
     price_ceiling_source: PropTypes.string,
-    message: PropTypes.string
+    message: PropTypes.string,
   }).isRequired,
-  onMarkAsRead: PropTypes.func
+  onMarkAsRead: PropTypes.func,
+  markingAsRead: PropTypes.bool
 };
 
 export default function AlertEventCard({ alert, onMarkAsRead, markingAsRead }) {

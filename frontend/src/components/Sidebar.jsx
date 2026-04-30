@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import { NavLink } from "react-router-dom";
 
 const navigationGroups = [
@@ -154,3 +155,16 @@ export default function Sidebar({ open, user, onClose, onSignOut }) {
     </aside>
   );
 }
+
+Sidebar.propTypes = {
+  open: PropTypes.bool,
+  user: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    username: PropTypes.string,
+    email: PropTypes.string,
+    first_name: PropTypes.string,
+    last_name: PropTypes.string,
+  }),
+  onClose: PropTypes.func,
+  onSignOut: PropTypes.func,
+};

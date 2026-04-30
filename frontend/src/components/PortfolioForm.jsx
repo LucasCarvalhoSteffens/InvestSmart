@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 const PORTFOLIO_TEMPLATES = [
   {
     label: "Dividendos",
@@ -44,6 +46,18 @@ export default function PortfolioForm({
   function applyTemplate(template) {
     emitChange("name", template.name);
     emitChange("description", template.description);
+  }
+
+  function getSubmitButtonLabel() {
+    if (submitting) {
+      return "Salvando...";
+    }
+
+    if (editing) {
+      return "Atualizar carteira";
+    }
+
+    return "Criar carteira";
   }
 
   return (
@@ -125,11 +139,7 @@ export default function PortfolioForm({
 
         <div className="portfolio-create-actions compact">
           <button className="primary-btn" type="submit" disabled={submitting}>
-            {submitting
-              ? "Salvando..."
-              : editing
-                ? "Atualizar carteira"
-                : "Criar carteira"}
+            {getSubmitButtonLabel()}
           </button>
 
           {editing && (
@@ -147,3 +157,15 @@ export default function PortfolioForm({
     </div>
   );
 }
+
+PortfolioForm.propTypes = {
+  form: PropTypes.shape({
+    name: PropTypes.string,
+    description: PropTypes.string,
+  }).isRequired,
+  onChange: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  onCancel: PropTypes.func,
+  submitting: PropTypes.bool,
+  editing: PropTypes.bool,
+};

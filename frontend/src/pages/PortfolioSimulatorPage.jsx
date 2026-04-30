@@ -13,16 +13,48 @@ const EMPTY_SIM_FORM = {
 };
 
 function cleanTicker(value) {
-  if (!value) {
+    if (value) {
+      return String(value)
+        .trim()
+        .split(" - ")[0]
+        .split(" ")[0]
+        .toUpperCase();
+    }
+  
     return "";
   }
 
-  return String(value)
-    .trim()
-    .split(" - ")[0]
-    .split(" ")[0]
-    .toUpperCase();
-}
+  function formatOptionalCurrency(value) {
+    if (value === null) {
+      return "Não aplicável";
+    }
+  
+    return formatCurrency(value);
+  }
+  
+  function formatOptionalPercent(value) {
+    if (value === null) {
+      return "Não aplicável";
+    }
+  
+    return formatPercent(value);
+  }
+  
+  function getMetricClass(value) {
+    return value >= 0 ? "metric-positive" : "metric-negative";
+  }
+  
+  function createSimulationItemId(ticker) {
+    const hasRandomUuid =
+      typeof globalThis.crypto !== "undefined" &&
+      typeof globalThis.crypto.randomUUID === "function";
+  
+    if (hasRandomUuid) {
+      return globalThis.crypto.randomUUID();
+    }
+  
+    return `${Date.now()}-${ticker}`;
+  }
 
 function formatCurrency(value) {
   const numericValue = Number(value ?? 0);
@@ -72,35 +104,38 @@ function extractErrorMessage(error, fallbackMessage) {
 }
 
 function buildItemMetrics(item) {
-  const quantity = Number(item.quantity ?? 0);
-  const averagePrice = Number(item.average_price ?? 0);
-  const currentPrice = Number(item.current_price ?? 0);
-  const targetPrice = Number(item.target_price ?? 0);
-
-  const investedAmount = quantity * averagePrice;
-  const currentValue = quantity * currentPrice;
-  const targetValue = targetPrice > 0 ? quantity * targetPrice : null;
-  const unrealizedGain = currentValue - investedAmount;
-  const unrealizedGainPct =
-    investedAmount > 0 ? (unrealizedGain / investedAmount) * 100 : 0;
-
-  const targetGain = targetValue !== null ? targetValue - currentValue : null;
-  const targetGainPct =
-    targetValue !== null && currentValue > 0
-      ? (targetGain / currentValue) * 100
-      : null;
-
-  return {
-    investedAmount,
-    currentValue,
-    targetValue,
-    unrealizedGain,
-    unrealizedGainPct,
-    targetGain,
-    targetGainPct,
-    isOpportunity: targetPrice > 0 && currentPrice <= targetPrice,
-  };
-}
+    const quantity = Number(item.quantity ?? 0);
+    const averagePrice = Number(item.average_price ?? 0);
+    const currentPrice = Number(item.current_price ?? 0);
+    const targetPrice = Number(item.target_price ?? 0);
+  
+    const investedAmount = quantity * averagePrice;
+    const currentValue = quantity * currentPrice;
+    const unrealizedGain = currentValue - investedAmount;
+    const unrealizedGainPct =
+      investedAmount > 0 ? (unrealizedGain / investedAmount) * 100 : 0;
+  
+    let targetValue = null;
+    let targetGain = null;
+    let targetGainPct = null;
+  
+    if (targetPrice > 0) {
+      targetValue = quantity * targetPrice;
+      targetGain = targetValue - currentValue;
+      targetGainPct = currentValue > 0 ? (targetGain / currentValue) * 100 : null;
+    }
+  
+    return {
+      investedAmount,
+      currentValue,
+      targetValue,
+      unrealizedGain,
+      unrealizedGainPct,
+      targetGain,
+      targetGainPct,
+      isOpportunity: targetPrice > 0 && currentPrice <= targetPrice,
+    };
+  }
 
 export default function PortfolioSimulatorPage() {
   const { accessToken } = useAuth();
@@ -226,10 +261,7 @@ export default function PortfolioSimulatorPage() {
       const syncedAsset = await syncAssetByTicker(ticker, accessToken, false);
 
       const newItem = {
-        id:
-          typeof crypto !== "undefined" && crypto.randomUUID
-            ? crypto.randomUUID()
-            : `${Date.now()}-${ticker}`,
+        id: createSimulationItemId(ticker),
         ticker: syncedAsset.ticker,
         name: syncedAsset.name || selectedAsset?.name || ticker,
         sector: syncedAsset.sector || "",
@@ -256,7 +288,7 @@ export default function PortfolioSimulatorPage() {
   }
 
   function handleClearSimulation() {
-    const confirmed = window.confirm("Deseja limpar toda a simulação?");
+    const confirmed = globalThis.confirm("Deseja limpar toda a simulação?");
 
     if (!confirmed) {
       return;
@@ -365,7 +397,7 @@ export default function PortfolioSimulatorPage() {
 
             <div className="simulator-input-grid">
               <label className="form-group">
-                Quantidade
+                <span>Quantidade</span>
                 <input
                   type="number"
                   name="quantity"
@@ -378,7 +410,7 @@ export default function PortfolioSimulatorPage() {
               </label>
 
               <label className="form-group">
-                Preço médio simulado
+                <span>Preço médio simulado</span>
                 <input
                   type="number"
                   name="average_price"
@@ -392,7 +424,7 @@ export default function PortfolioSimulatorPage() {
               </label>
 
               <label className="form-group">
-                Preço teto desejado
+                <span>Preço teto desejado</span>
                 <input
                   type="number"
                   name="target_price"
@@ -405,7 +437,7 @@ export default function PortfolioSimulatorPage() {
               </label>
 
               <label className="form-group">
-                Observações
+                <span>Observações</span>
                 <textarea
                   name="notes"
                   value={form.notes}
@@ -447,11 +479,7 @@ export default function PortfolioSimulatorPage() {
 
             <div className="summary-stat">
               <span className="summary-label">Ganho/Perda</span>
-              <strong
-                className={
-                  summary.currentGain >= 0 ? "metric-positive" : "metric-negative"
-                }
-              >
+              <strong className={getMetricClass(summary.currentGain)}>
                 {formatCurrency(summary.currentGain)}
               </strong>
             </div>
@@ -468,11 +496,7 @@ export default function PortfolioSimulatorPage() {
 
             <div className="summary-stat">
               <span className="summary-label">Potencial até teto</span>
-              <strong
-                className={
-                  summary.targetGain >= 0 ? "metric-positive" : "metric-negative"
-                }
-              >
+              <strong className={getMetricClass(summary.targetGain)}>
                 {formatCurrency(summary.targetGain)}
               </strong>
             </div>
@@ -485,8 +509,8 @@ export default function PortfolioSimulatorPage() {
 
           <div className="simulator-save-box">
             <label>
-              Nome para salvar como carteira
-              <input
+                <span>Nome para salvar como carteira</span>
+                <input
                 type="text"
                 value={portfolioName}
                 onChange={(event) => setPortfolioName(event.target.value)}
@@ -608,14 +632,8 @@ export default function PortfolioSimulatorPage() {
 
                   <div className="result-item">
                     <span>Ganho/Perda atual</span>
-                    <strong
-                      className={
-                        item.metrics.unrealizedGain >= 0
-                          ? "metric-positive"
-                          : "metric-negative"
-                      }
-                    >
-                      {formatCurrency(item.metrics.unrealizedGain)}
+                    <strong className={getMetricClass(item.metrics.unrealizedGain)}>
+                        {formatCurrency(item.metrics.unrealizedGain)}
                     </strong>
                   </div>
 
@@ -627,18 +645,14 @@ export default function PortfolioSimulatorPage() {
                   <div className="result-item">
                     <span>Potencial até teto</span>
                     <strong>
-                      {item.metrics.targetGain !== null
-                        ? formatCurrency(item.metrics.targetGain)
-                        : "Não aplicável"}
+                        {formatOptionalCurrency(item.metrics.targetGain)}
                     </strong>
                   </div>
 
                   <div className="result-item">
                     <span>Potencial percentual</span>
                     <strong>
-                      {item.metrics.targetGainPct !== null
-                        ? formatPercent(item.metrics.targetGainPct)
-                        : "Não aplicável"}
+                        {formatOptionalPercent(item.metrics.targetGainPct)}
                     </strong>
                   </div>
                 </div>

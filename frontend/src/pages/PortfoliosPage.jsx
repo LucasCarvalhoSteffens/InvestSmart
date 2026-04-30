@@ -263,7 +263,7 @@ export default function PortfoliosPage() {
   }
 
   async function handleDeletePortfolio(portfolioId) {
-    const confirmed = window.confirm(
+    const confirmed = globalThis.confirm(
       "Tem certeza que deseja excluir esta carteira?",
     );
 
@@ -348,7 +348,7 @@ export default function PortfoliosPage() {
   }
 
   async function handleDeleteItem(itemId) {
-    const confirmed = window.confirm(
+    const confirmed = globalThis.confirm(
       "Tem certeza que deseja remover este ativo da carteira?",
     );
 
@@ -450,6 +450,76 @@ export default function PortfoliosPage() {
     }
   }
 
+  function renderPortfolioListContent() {
+    if (loading) {
+      return <p className="muted">Carregando carteiras...</p>;
+    }
+  
+    if (portfolios.length === 0) {
+      return (
+        <div className="empty-state compact">
+          <strong>Nenhuma carteira cadastrada</strong>
+          <span>Crie sua primeira carteira usando o formulário acima.</span>
+        </div>
+      );
+    }
+  
+    if (filteredPortfolios.length === 0) {
+      return (
+        <div className="empty-state compact">
+          <strong>Nenhuma carteira encontrada</strong>
+          <span>Tente outro termo na busca.</span>
+        </div>
+      );
+    }
+  
+    return (
+      <div className="portfolio-list">
+        {filteredPortfolios.map((portfolio) => (
+          <article
+            key={portfolio.id}
+            className={`portfolio-list-item ${
+              portfolio.id === selectedPortfolioId ? "active" : ""
+            }`}
+          >
+            <button
+              type="button"
+              className="portfolio-list-button"
+              onClick={() => setSelectedPortfolioId(portfolio.id)}
+            >
+              <span className="portfolio-list-main">
+                <strong>{portfolio.name}</strong>
+                <span>{portfolio.total_items} ativo(s)</span>
+  
+                {portfolio.description && (
+                  <small>{portfolio.description}</small>
+                )}
+              </span>
+            </button>
+  
+            <div className="portfolio-list-actions">
+              <button
+                type="button"
+                className="secondary-btn"
+                onClick={() => handleEditPortfolio(portfolio)}
+              >
+                Editar
+              </button>
+  
+              <button
+                type="button"
+                className="danger-btn"
+                onClick={() => handleDeletePortfolio(portfolio.id)}
+              >
+                Excluir
+              </button>
+            </div>
+          </article>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="portfolios-page">
       <header className="page-header compact portfolio-page-header">
@@ -508,62 +578,8 @@ export default function PortfoliosPage() {
               />
             </div>
 
-            {loading ? (
-              <p className="muted">Carregando carteiras...</p>
-            ) : portfolios.length === 0 ? (
-              <div className="empty-state compact">
-                <strong>Nenhuma carteira cadastrada</strong>
-                <span>Crie sua primeira carteira usando o formulário acima.</span>
-              </div>
-            ) : filteredPortfolios.length === 0 ? (
-              <div className="empty-state compact">
-                <strong>Nenhuma carteira encontrada</strong>
-                <span>Tente outro termo na busca.</span>
-              </div>
-            ) : (
-              <div className="portfolio-list">
-                {filteredPortfolios.map((portfolio) => (
-                  <article
-                    key={portfolio.id}
-                    className={`portfolio-list-item ${
-                      portfolio.id === selectedPortfolioId ? "active" : ""
-                    }`}
-                  >
-                    <button
-                      type="button"
-                      className="portfolio-list-button"
-                      onClick={() => setSelectedPortfolioId(portfolio.id)}
-                    >
-                      <span className="portfolio-list-main">
-                        <strong>{portfolio.name}</strong>
-                        <span>{portfolio.total_items} ativo(s)</span>
-                        {portfolio.description && (
-                          <small>{portfolio.description}</small>
-                        )}
-                      </span>
-                    </button>
-
-                    <div className="portfolio-list-actions">
-                      <button
-                        type="button"
-                        className="secondary-btn"
-                        onClick={() => handleEditPortfolio(portfolio)}
-                      >
-                        Editar
-                      </button>
-
-                      <button
-                        type="button"
-                        className="danger-btn"
-                        onClick={() => handleDeletePortfolio(portfolio.id)}
-                      >
-                        Excluir
-                      </button>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
+            {renderPortfolioListContent()}
+            
           </div>
         </aside>
 

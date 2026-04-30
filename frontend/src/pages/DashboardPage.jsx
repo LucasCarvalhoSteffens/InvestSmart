@@ -1,9 +1,9 @@
+import PropTypes from "prop-types";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Bar,
   BarChart,
   CartesianGrid,
-  Cell,
   Legend,
   Line,
   LineChart,
@@ -116,7 +116,8 @@ export default function DashboardPage() {
   const [error, setError] = useState("");
 
   const summary = simulation?.summary ?? {};
-  const items = simulation?.items ?? [];
+
+  const items = useMemo(() => simulation?.items ?? [], [simulation]);
 
   const loadPortfolios = useCallback(async () => {
     if (!accessToken) {
@@ -214,9 +215,10 @@ export default function DashboardPage() {
 
   const allocationData = useMemo(
     () =>
-      items.map((item) => ({
+      items.map((item, index) => ({
         name: item.asset_ticker,
         value: toNumber(item.current_value),
+        fill: CHART_COLORS[index % CHART_COLORS.length],
       })),
     [items],
   );
@@ -372,14 +374,7 @@ export default function DashboardPage() {
                 nameKey="name"
                 outerRadius={95}
                 label
-              >
-                {allocationData.map((entry, index) => (
-                  <Cell
-                    key={entry.name}
-                    fill={CHART_COLORS[index % CHART_COLORS.length]}
-                  />
-                ))}
-              </Pie>
+              />
 
               <Tooltip formatter={(value) => formatCurrency(value)} />
               <Legend />
@@ -433,7 +428,7 @@ export default function DashboardPage() {
       >
         <div className="dashboard-projection-toolbar">
           <label>
-            Rentabilidade anual simulada (%)
+            <span>Rentabilidade anual simulada (%)</span>
             <input
               type="number"
               min="0"
@@ -472,3 +467,16 @@ export default function DashboardPage() {
     </section>
   );
 }
+
+DashboardKpiCard.propTypes = {
+  title: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  subtitle: PropTypes.string,
+  variant: PropTypes.string,
+};
+
+SectionCard.propTypes = {
+  title: PropTypes.string.isRequired,
+  description: PropTypes.string,
+  children: PropTypes.node.isRequired,
+};

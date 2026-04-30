@@ -184,6 +184,37 @@ export default function AlertEventsPage() {
     }
   }
 
+  function renderAlertsContent() {
+    if (loadingAlerts) {
+      return <div className="loading-card">Carregando alertas...</div>;
+    }
+
+    if (filteredAlerts.length === 0) {
+      return (
+        <div className="empty-state">
+          <strong>Nenhum alerta encontrado</strong>
+          <span>
+            Quando a rotina identificar ativos acima ou abaixo do preço teto,
+            os alertas aparecerão aqui.
+          </span>
+        </div>
+      );
+    }
+
+    return (
+      <div className="alerts-v2-grid">
+        {filteredAlerts.map((alert) => (
+          <AlertEventCard
+            key={alert.id}
+            alert={alert}
+            onMarkAsRead={handleMarkAsRead}
+            markingAsRead={markingAsReadId === alert.id}
+          />
+        ))}
+      </div>
+    );
+  }
+
   useEffect(() => {
     let shouldUpdate = true;
 
@@ -377,7 +408,7 @@ export default function AlertEventsPage() {
 
         <div className="alerts-v2-filter-grid">
           <label>
-            Carteira
+            <span>Carteira</span>
             <select
               value={selectedPortfolioId}
               onChange={(event) => setSelectedPortfolioId(event.target.value)}
@@ -394,7 +425,7 @@ export default function AlertEventsPage() {
           </label>
 
           <label>
-            Buscar
+            <span>Buscar</span>
             <input
               type="text"
               value={searchTerm}
@@ -423,28 +454,7 @@ export default function AlertEventsPage() {
           </div>
         </div>
 
-        {loadingAlerts ? (
-          <div className="loading-card">Carregando alertas...</div>
-        ) : filteredAlerts.length === 0 ? (
-          <div className="empty-state">
-            <strong>Nenhum alerta encontrado</strong>
-            <span>
-              Quando a rotina identificar ativos acima ou abaixo do preço teto,
-              os alertas aparecerão aqui.
-            </span>
-          </div>
-        ) : (
-          <div className="alerts-v2-grid">
-            {filteredAlerts.map((alert) => (
-              <AlertEventCard
-                key={alert.id}
-                alert={alert}
-                onMarkAsRead={handleMarkAsRead}
-                markingAsRead={markingAsReadId === alert.id}
-              />
-            ))}
-          </div>
-        )}
+        {renderAlertsContent()}
       </section>
     </div>
   );
