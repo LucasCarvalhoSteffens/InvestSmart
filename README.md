@@ -855,6 +855,15 @@ python manage.py test apps.portfolios.tests --settings=config.settings_test
 
 O projeto utiliza SonarCloud para análise contínua de qualidade, segurança e cobertura.
 
+### Cobertura de Testes
+
+O projeto utiliza duas estratégias de validação de cobertura:
+
+- **Backend:** cobertura analisada pelo SonarCloud a partir do relatório `backend/coverage.xml`.
+- **Frontend:** cobertura validada no CI com Vitest, gerando `frontend/coverage/lcov.info` e aplicando thresholds mínimos no `vite.config.js`.
+
+Essa separação foi adotada porque o SonarCloud Free utiliza o Quality Gate padrão `Sonar way`, com cobertura mínima de 80% em código novo, enquanto os critérios acadêmicos do projeto exigem 25% para frontend e 75% para backend.
+
 ### Configuração
 
 ```text
