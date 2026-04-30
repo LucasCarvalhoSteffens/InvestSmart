@@ -25,6 +25,7 @@ const EMPTY_PORTFOLIO_FORM = {
 
 const EMPTY_ITEM_FORM = {
   asset: "",
+  ticker: "",
   quantity: "",
   average_price: "",
   target_price: "",
@@ -223,10 +224,11 @@ export default function PortfoliosPage() {
     }));
   }
 
-  function handleAssetChange(value) {
+  function handleAssetChange(ticker) {
     setItemForm((previous) => ({
       ...previous,
-      asset: value,
+      ticker,
+      asset: "",
     }));
   }
 
@@ -307,14 +309,29 @@ export default function PortfoliosPage() {
     setItemSubmitting(true);
     setPageError("");
 
+    const cleanTicker = itemForm.ticker
+  ? itemForm.ticker.trim().split(" - ")[0].split(" ")[0].toUpperCase()
+  : "";
+
     const payload = {
       portfolio: selectedPortfolio.id,
-      asset: itemForm.asset,
       quantity: itemForm.quantity,
       average_price: itemForm.average_price,
       target_price: itemForm.target_price || null,
       notes: itemForm.notes,
     };
+
+    if (cleanTicker) {
+      payload.ticker = cleanTicker;
+    } else if (itemForm.asset) {
+      payload.asset = itemForm.asset;
+    }
+    
+    if (itemForm.ticker) {
+      payload.ticker = itemForm.ticker;
+    } else if (itemForm.asset) {
+      payload.asset = itemForm.asset;
+    }
 
     try {
       if (itemEditingId) {
@@ -337,8 +354,10 @@ export default function PortfoliosPage() {
 
   function handleEditItem(item) {
     setItemEditingId(item.id);
+  
     setItemForm({
       asset: String(item.asset),
+      ticker: item.asset_ticker || "",
       quantity: String(item.quantity),
       average_price: String(item.average_price),
       target_price: item.target_price ? String(item.target_price) : "",

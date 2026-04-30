@@ -1,47 +1,28 @@
 import http from "./http";
 
-export async function listAssets(accessToken) {
+export async function listAssets(access) {
   const { data } = await http.get("/assets/", {
-    headers: accessToken
-      ? {
-          Authorization: `Bearer ${accessToken}`,
-        }
-      : {},
+    headers: {
+      Authorization: `Bearer ${access}`,
+    },
   });
 
   return data;
 }
 
-export async function searchAssets(query, accessToken) {
+export async function searchAssets(query, access) {
+  if (!query || query.trim().length < 2) {
+    return [];
+  }
+
   const { data } = await http.get("/assets/search/", {
     params: {
-      q: query,
+      q: query.trim(),
     },
-    headers: accessToken
-      ? {
-          Authorization: `Bearer ${accessToken}`,
-        }
-      : {},
+    headers: {
+      Authorization: `Bearer ${access}`,
+    },
   });
-
-  return data;
-}
-
-export async function syncAssetByTicker(ticker, accessToken, forceRefresh = false) {
-  const { data } = await http.post(
-    "/assets/sync/",
-    {
-      ticker,
-      force_refresh: forceRefresh,
-    },
-    {
-      headers: accessToken
-        ? {
-            Authorization: `Bearer ${accessToken}`,
-          }
-        : {},
-    }
-  );
 
   return data;
 }
