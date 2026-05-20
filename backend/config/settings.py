@@ -20,13 +20,13 @@ def env_bool(name, default=False):
 # Segurança
 DEBUG = env_bool("DEBUG", True)
 
-SECRET_KEY = os.getenv("SECRET_KEY_DJANGO")
+SECRET_KEY = os.getenv("SECRET_KEY_DJANGO_DEV")
 
 if not SECRET_KEY:
-    if not SECRET_KEY:
-        raise RuntimeError("SECRET_KEY_DJANGO não definida.")
-
-ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", "127.0.0.1,localhost")
+    if DEBUG:
+        SECRET_KEY = os.getenv("SECRET_KEY_DJANGO")
+    else:
+        raise RuntimeError("SECRET_KEY_DJANGO não definida em produção.")
 
 
 # Aplicações
