@@ -23,10 +23,8 @@ DEBUG = env_bool("DEBUG", True)
 SECRET_KEY = os.getenv("SECRET_KEY_DJANGO")
 
 if not SECRET_KEY:
-    if DEBUG:
-        SECRET_KEY = "django-insecure-dev-key-only"
-    else:
-        raise RuntimeError("SECRET_KEY_DJANGO não definida em produção.")
+    if not SECRET_KEY:
+        raise RuntimeError("SECRET_KEY_DJANGO não definida.")
 
 ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", "127.0.0.1,localhost")
 
