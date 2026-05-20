@@ -39,7 +39,7 @@ services:
       - media_volume:/media
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     ports:
-      - "8080:80"
+      - "80:80"
     networks:
       - investsmart_network
 
