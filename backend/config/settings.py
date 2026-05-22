@@ -20,15 +20,15 @@ def env_bool(name, default=False):
 # Segurança
 DEBUG = env_bool("DEBUG", True)
 
-SECRET_KEY = os.getenv("SECRET_KEY_DJANGO_DEV")
+SECRET_KEY = os.getenv("SECRET_KEY_DJANGO")
 
 if not SECRET_KEY:
     if DEBUG:
         SECRET_KEY = os.getenv("SECRET_KEY_DJANGO")
     else:
-        raise RuntimeError("SECRET_KEY_DJANGO não definida em produção.")
+        raise RuntimeError("SECRET_KEY_DJANGO não definida")
 
-
+ALLOWED_HOSTS = env_list("ALLOWED_HOSTS")
 # Aplicações
 INSTALLED_APPS = [
     "django.contrib.admin",
