@@ -1,0 +1,64 @@
+name: Deploy Production
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["SonarCloud"]
+    types:
+      - completed
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to Hostinger VPS
+    runs-on: ubuntu-latest
+
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+
+    steps:
+      - name: Deploy on VPS via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script_stop: true
+          script: |
+            set -e
+
+            echo "Entrando no projeto..."
+            cd ${{ secrets.VPS_PROJECT_PATH }}
+
+            echo "Atualizando código da main..."
+            git fetch origin main
+            git reset --hard origin/main
+
+            echo "Validando arquivos obrigatórios..."
+            test -f .env.production || (echo ".env.production não encontrado na VPS" && exit 1)
+            test -f docker-compose.prod.yml || (echo "docker-compose.prod.yml não encontrado" && exit 1)
+            test -f Caddyfile || (echo "Caddyfile não encontrado" && exit 1)
+
+            echo "Buildando containers..."
+            docker compose -f docker-compose.prod.yml build
+
+            echo "Subindo banco..."
+            docker compose -f docker-compose.prod.yml up -d db
+
+            echo "Aplicando migrations..."
+            docker compose -f docker-compose.prod.yml run --rm backend python manage.py migrate
+
+            echo "Coletando static files..."
+            docker compose -f docker-compose.prod.yml run --rm backend python manage.py collectstatic --noinput
+
+            echo "Subindo aplicação..."
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+
+            echo "Limpando imagens antigas..."
+            docker image prune -f
+
+            echo "Status final dos containers:"
+            docker compose -f docker-compose.prod.yml ps
