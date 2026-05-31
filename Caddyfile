@@ -1,0 +1,3 @@
+investsmartlcs.com, www.investsmartlcs.com {
+    reverse_proxy frontend:80
+}
