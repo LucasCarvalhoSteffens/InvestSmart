@@ -1097,12 +1097,6 @@ O projeto contempla:
 
 ---
 
-## Licença
-
-Este projeto é distribuído sob a licença MIT, permitindo uso, modificação e distribuição, desde que mantidos os créditos autorais originais.
-
----
-
 ## Autor
 
 **Lucas de Carvalho Steffens**  
