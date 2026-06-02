@@ -1,32 +1,45 @@
 import PropTypes from "prop-types";
 
 const LABELS = {
-    ticker: "Ticker",
-    asset_ticker: "Ticker",
-    asset_name: "Ativo",
-    name: "Nome",
-    current_price: "Preço atual",
-    fair_price: "Preço justo",
-    target_price: "Preço teto",
-    ceiling_price: "Preço teto",
-    projected_price: "Preço projetado",
-    graham_price: "Preço Graham",
-    barsi_price: "Preço Barsi",
-    intrinsic_value: "Valor intrínseco",
-    lpa: "LPA",
-    eps: "LPA",
-    vpa: "VPA",
-    book_value_per_share: "VPA",
-    dpa: "DPA",
-    dividends: "Dividendos",
-    annual_dividend: "Dividendo anual",
-    target_yield: "Yield alvo",
-    average_dividend_yield: "Dividend Yield médio",
-    dividend_yield: "Dividend Yield",
-    margin_of_safety: "Margem de segurança",
-    margin_of_safety_pct: "Margem de segurança",
-    source: "Fonte",
-  };
+  ticker: "Ticker",
+  asset_ticker: "Ticker",
+  asset_name: "Ativo",
+  name: "Nome do ativo",
+
+  current_price: "Preço atual",
+  raw_price: "Preço bruto",
+  fair_price: "Preço justo",
+  target_price: "Preço teto",
+  ceiling_price: "Preço teto",
+  price_ceiling: "Preço teto",
+  projected_price: "Preço projetado",
+  graham_price: "Preço Graham",
+  barsi_price: "Preço Barsi",
+  intrinsic_value: "Valor intrínseco",
+
+  lpa: "LPA",
+  eps: "LPA",
+  vpa: "VPA",
+  book_value_per_share: "VPA",
+
+  dpa: "DPA",
+  dividends: "Dividendos",
+  annual_dividend: "Dividendo anual",
+
+  target_yield: "Rendimento alvo",
+  average_dividend_yield: "Rendimento médio de dividendos",
+  dividend_yield: "Rendimento de dividendos",
+
+  margin: "Margem de segurança",
+  margin_of_safety: "Margem de segurança",
+  margin_of_safety_pct: "Margem de segurança",
+
+  opportunity: "Oportunidade",
+  is_opportunity: "Oportunidade",
+
+  persisted: "Salvo no histórico",
+  source: "Fonte",
+};
   
   const HIDDEN_KEYS = new Set([
     "id",
@@ -34,6 +47,7 @@ const LABELS = {
     "asset_id",
     "created_at",
     "updated_at",
+    "source",
   ]);
   
   function formatLabel(key) {
@@ -117,6 +131,10 @@ const LABELS = {
       }
   
       return formatNumber(value);
+    }
+  
+    if (typeof value === "object") {
+      return "Não informado";
     }
   
     return String(value);
