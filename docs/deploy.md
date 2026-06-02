@@ -151,21 +151,3 @@ VPS_PROJECT_PATH
 ```
 
 ---
-
-## Evidências Recomendadas
-
-Salvar prints em:
-
-```text
-docs/evidencias/producao/
-docs/evidencias/github-actions/
-```
-
-Evidências sugeridas:
-
-- aplicação aberta em produção;
-- containers rodando na VPS;
-- workflow de deploy executado com sucesso;
-- logs do backend;
-- logs do scheduler;
-- HTTPS ativo no domínio.
