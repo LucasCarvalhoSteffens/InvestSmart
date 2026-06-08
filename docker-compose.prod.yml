@@ -86,9 +86,9 @@ services:
     env_file:
       - .env.production
     environment:
-      GF_SERVER_DOMAIN: investsmartlcs.com
-      GF_SERVER_ROOT_URL: https://investsmartlcs.com/grafana/
-      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+      GF_SERVER_DOMAIN: grafana.investsmartlcs.com
+      GF_SERVER_ROOT_URL: https://grafana.investsmartlcs.com/
+      GF_SERVER_SERVE_FROM_SUB_PATH: "false"
       GF_USERS_ALLOW_SIGN_UP: "false"
     volumes:
       - grafana_data:/var/lib/grafana

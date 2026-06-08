@@ -1,11 +1,7 @@
 investsmartlcs.com, www.investsmartlcs.com {
-    redir /grafana /grafana/
+    reverse_proxy frontend:80
+}
 
-    handle /grafana/* {
-        reverse_proxy grafana:3000
-    }
-
-    handle {
-        reverse_proxy frontend:80
-    }
+grafana.investsmartlcs.com {
+    reverse_proxy grafana:3000
 }
