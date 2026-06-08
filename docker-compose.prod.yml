@@ -59,12 +59,52 @@ services:
     networks:
       - investsmart_network
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: investsmart_prometheus
+    restart: always
+    depends_on:
+      - backend
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle"
+    expose:
+      - "9090"
+    networks:
+      - investsmart_network
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: investsmart_grafana
+    restart: always
+    depends_on:
+      - prometheus
+    env_file:
+      - .env.production
+    environment:
+      GF_SERVER_DOMAIN: investsmartlcs.com
+      GF_SERVER_ROOT_URL: https://investsmartlcs.com/grafana/
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    expose:
+      - "3000"
+    networks:
+      - investsmart_network
+
   caddy:
     image: caddy:2-alpine
     container_name: investsmart_caddy
     restart: always
     depends_on:
       - frontend
+      - grafana
     ports:
       - "80:80"
       - "443:443"
@@ -81,6 +121,8 @@ volumes:
   media_volume:
   caddy_data:
   caddy_config:
+  prometheus_data:
+  grafana_data:
 
 networks:
   investsmart_network:
