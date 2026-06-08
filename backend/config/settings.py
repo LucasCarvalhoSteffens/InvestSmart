@@ -31,6 +31,8 @@ if not SECRET_KEY:
 ALLOWED_HOSTS = env_list("ALLOWED_HOSTS")
 # Aplicações
 INSTALLED_APPS = [
+    "django_prometheus",
+    
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -51,6 +53,8 @@ INSTALLED_APPS = [
 
 # Middlewares
 MIDDLEWARE = [
+    "django_prometheus.middleware.PrometheusBeforeMiddleware",
+    
     "django.middleware.security.SecurityMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -86,7 +90,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Banco de dados
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
+        "ENGINE": "django_prometheus.db.backends.postgresql",
         "NAME": os.getenv("POSTGRES_DB"),
         "USER": os.getenv("POSTGRES_USER"),
         "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
