@@ -30,7 +30,7 @@
 | RNF07 | Testes automatizados | Implementado |
 | RNF08 | Análise estática com SonarCloud | Implementado |
 | RNF09 | Uso de Docker para padronização de ambiente | Implementado |
-| RNF10 | Estratégia de observabilidade | Em evolução |
+| RNF10 | Estratégia de observabilidade | Implementado |
 | RNF11 | Documentação técnica no repositório | Em finalização |
 | RNF12 | HTTPS em produção | Implementado |
 
