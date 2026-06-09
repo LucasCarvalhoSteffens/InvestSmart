@@ -31,7 +31,7 @@
 | RNF08 | Análise estática com SonarCloud | Implementado |
 | RNF09 | Uso de Docker para padronização de ambiente | Implementado |
 | RNF10 | Estratégia de observabilidade | Implementado |
-| RNF11 | Documentação técnica no repositório | Em finalização |
+| RNF11 | Documentação técnica no repositório | Implementado |
 | RNF12 | HTTPS em produção | Implementado |
 
 ---
